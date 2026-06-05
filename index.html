@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Offload · Internal Apps</title>
+
+  <!-- iOS "Add to Home Screen" support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Offload">
+  <meta name="theme-color" content="#0b1020">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="manifest" href="manifest.json">
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+
+  <style>
+    /* ───────────────────────────────────────────────
+       EDIT YOUR APPS IN THE <script> BLOCK AT THE BOTTOM
+       ─────────────────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'DM Sans', -apple-system, system-ui, sans-serif;
+      color: #fff;
+      min-height: 100dvh;
+      /* Wallpaper — deep gradient, swap colors to taste */
+      background:
+        radial-gradient(1200px 800px at 20% 10%, #1f2a52 0%, transparent 55%),
+        radial-gradient(1000px 700px at 85% 90%, #3a1f52 0%, transparent 55%),
+        linear-gradient(160deg, #0b1020 0%, #0d1228 60%, #0a0f1e 100%);
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
+      overflow-x: hidden;
+    }
+
+    /* ── Clock / header ── */
+    .top { width: 100%; max-width: 540px; text-align: center; padding: 48px 0 8px; }
+    .clock { font-size: 64px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; text-shadow: 0 2px 20px rgba(0,0,0,0.4); }
+    .date { font-size: 16px; font-weight: 500; opacity: 0.85; margin-top: 6px; }
+    .greeting { font-size: 13px; font-weight: 500; opacity: 0.55; margin-top: 18px; text-transform: uppercase; letter-spacing: 0.12em; }
+
+    /* ── App grid ── */
+    .grid {
+      width: 100%;
+      max-width: 540px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px 8px;
+      padding: 40px 4px 0;
+    }
+    @media (max-width: 420px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 24px 4px; } }
+
+    .app { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: #fff; }
+    .icon {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
+      position: relative;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .icon::after {
+      content: ''; position: absolute; inset: 0; border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 45%);
+      pointer-events: none;
+    }
+    .app:active .icon { transform: scale(0.92); }
+    .label { font-size: 12.5px; font-weight: 500; text-align: center; max-width: 78px; line-height: 1.25; text-shadow: 0 1px 6px rgba(0,0,0,0.5); }
+
+    .badge-soon {
+      position: absolute; top: -6px; right: -6px;
+      background: #ff453a; color: #fff;
+      font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .footer { margin-top: auto; padding: 36px 0 20px; font-size: 11px; opacity: 0.4; letter-spacing: 0.04em; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="clock" id="clock">--:--</div>
+    <div class="date" id="date">—</div>
+    <div class="greeting" id="greeting">Internal Apps</div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="footer">Offload · internal use only</div>
+
+  <script>
+    /* ════════════════════════════════════════════════════
+       EDIT YOUR APPS HERE
+       - url:   where the icon links (full https URL)
+       - label: text under the icon
+       - icon:  any Tabler icon name → https://tabler.io/icons
+       - color: CSS background for the tile (gradient or solid)
+       - soon:  optional, set true to show a "SOON" badge + disable
+       ════════════════════════════════════════════════════ */
+    const APPS = [
+      {
+        label: 'Quote Builder',
+        url: 'https://rqr-quote-builder.vercel.app',
+        icon: 'ti-file-invoice',
+        color: 'linear-gradient(160deg, #e8651a, #b23b1a)',
+      },
+      {
+        label: 'Crew Training',
+        url: 'https://offload-crew-training.vercel.app/',
+        icon: 'ti-user-plus',
+        color: 'linear-gradient(160deg, #3a9d5d, #1a7a3c)',
+      },
+      // Add more apps by copying a block above ↑
+    ];
+
+    // ── Render the grid ──
+    const grid = document.getElementById('grid');
+    grid.innerHTML = APPS.map(a => {
+      const isPlaceholder = a.url.includes('YOUR-') || a.soon;
+      const href = isPlaceholder ? 'javascript:void(0)' : a.url;
+      const target = isPlaceholder ? '' : 'target="_blank" rel="noopener"';
+      return `
+        <a class="app" href="${href}" ${target}>
+          <div class="icon" style="background:${a.color}">
+            <i class="ti ${a.icon}"></i>
+            ${isPlaceholder ? '<span class="badge-soon">SET URL</span>' : ''}
+          </div>
+          <div class="label">${a.label}</div>
+        </a>`;
+    }).join('');
+
+    // ── Live clock ──
+    function tick() {
+      const now = new Date();
+      let h = now.getHours();
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      document.getElementById('clock').textContent = `${h}:${m}`;
+      document.getElementById('date').textContent =
+        now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      const hr = now.getHours();
+      document.getElementById('greeting').textContent =
+        hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+    }
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>
