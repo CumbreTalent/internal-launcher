@@ -82,6 +82,12 @@
       font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
+    .badge-test {
+      position: absolute; top: -6px; right: -6px;
+      background: #ffcc00; color: #1a1200;
+      font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
 
     .footer { margin-top: auto; padding: 36px 0 20px; font-size: 11px; opacity: 0.4; letter-spacing: 0.04em; }
   </style>
@@ -114,6 +120,13 @@
         color: 'linear-gradient(160deg, #e8651a, #b23b1a)',
       },
       {
+        label: 'QB Staging',
+        url: 'https://YOUR-staging-url.vercel.app',   // ← paste the staging Preview URL
+        icon: 'ti-flask',
+        color: 'linear-gradient(160deg, #d4a017, #8a6d0f)',
+        badge: 'TEST',
+      },
+      {
         label: 'Crew Training',
         url: 'https://offload-crew-training.vercel.app/',
         icon: 'ti-user-plus',
@@ -134,11 +147,14 @@
       const isPlaceholder = a.url.includes('YOUR-') || a.soon;
       const href = isPlaceholder ? 'javascript:void(0)' : a.url;
       const target = isPlaceholder ? '' : 'target="_blank" rel="noopener"';
+      const badgeHtml = isPlaceholder
+        ? '<span class="badge-soon">SET URL</span>'
+        : (a.badge ? `<span class="badge-test">${a.badge}</span>` : '');
       return `
         <a class="app" href="${href}" ${target}>
           <div class="icon" style="background:${a.color}">
             <i class="ti ${a.icon}"></i>
-            ${isPlaceholder ? '<span class="badge-soon">SET URL</span>' : ''}
+            ${badgeHtml}
           </div>
           <div class="label">${a.label}</div>
         </a>`;
