@@ -16,6 +16,10 @@
 //             the launcher share a domain (offloadcrew.com); otherwise the app
 //             opens in a new tab. Staging stays in a new tab because Vercel's
 //             own sign-in page refuses to load inside another page.
+//   previewHosts   — for staging tiles: the other test addresses of the same app
+//             (every Vercel preview build, and the future offloadcrew.com
+//             staging address). The staging lock sends admins back to the
+//             exact one they came from, so tickets may only go to these.
 //   adminOnly      — admins and the super admin only (hidden from assistants)
 //   superadminOnly — the super admin only
 //   badge          — little yellow tag
@@ -41,6 +45,7 @@ export const APPS = [
     adminOnly: true,
     legacy: 'https://offload-quote-builder-git-staging-cumbretalent-5400s-projects.vercel.app',
     custom: 'https://quotes-staging.offloadcrew.com',
+    previewHosts: [/^offload-quote-builder-[a-z0-9-]+-cumbretalent-5400s-projects\.vercel\.app$/, /^quotes-staging\.offloadcrew\.com$/],
     sso: true,
     embed: false,
   },
@@ -68,6 +73,7 @@ export const APPS = [
     adminOnly: true,
     legacy: 'https://tradezip-admin-git-staging-cumbretalent-5400s-projects.vercel.app',
     custom: 'https://console-staging.offloadcrew.com',
+    previewHosts: [/^tradezip-admin-[a-z0-9-]+-cumbretalent-5400s-projects\.vercel\.app$/, /^console-staging\.offloadcrew\.com$/],
     sso: true,
     embed: false,
   },
@@ -158,6 +164,15 @@ export const ticketRole = role => (isAdminLevel(role) ? 'admin' : role)
 
 export function useCustomDomains(env = process.env) {
   return env.LAUNCHER_USE_CUSTOM_DOMAINS === '1'
+}
+
+// A test address this app's staging tile may send a ticket to, or null.
+export function previewOrigin(app, origin) {
+  if (!app || !app.previewHosts || typeof origin !== 'string') return null
+  let u
+  try { u = new URL(origin) } catch { return null }
+  if (u.protocol !== 'https:' || u.port || u.username || u.password) return null
+  return app.previewHosts.some(re => re.test(u.hostname)) ? u.origin : null
 }
 
 export function tileUrl(app, custom) {

@@ -131,11 +131,11 @@
     return out
   }
 
-  async function postLaunch(token, app) {
+  async function postLaunch(token, app, origin) {
     const r = await fetch('/api/launch', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ app: app }),
+      body: JSON.stringify(origin ? { app: app, origin: origin } : { app: app }),
       cache: 'no-store',
     })
     const data = await r.json().catch(() => null)
@@ -144,14 +144,14 @@
 
   // The address to open for one app: { status, data: { url, sso } }. Same
   // refresh-once-on-401 behaviour as apps().
-  async function launch(app) {
+  async function launch(app, origin) {
     let s = await session()
     if (!s) return { status: 401, data: null }
-    let out = await postLaunch(s.access_token, app)
+    let out = await postLaunch(s.access_token, app, origin)
     if (out.status === 401) {
       s = await refresh(s)
       if (!s) return { status: 401, data: null }
-      out = await postLaunch(s.access_token, app)
+      out = await postLaunch(s.access_token, app, origin)
       if (out.status === 401) clear()
     }
     return out
