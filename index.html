@@ -573,11 +573,29 @@
         return notice((res.data && res.data.error) || 'Something went wrong loading your apps.', 'Try again', boot)
       }
 
+      const params = new URLSearchParams(location.search)
+
       // Arrived via a guarded page (workflow.html sends ?next=/workflow.html).
-      const next = new URLSearchParams(location.search).get('next')
+      const next = params.get('next')
       if (next && /^\/[^/\\]/.test(next)) { location.replace(next); return }
 
       renderGrid(res.data)
+
+      // Arrived from a locked staging site (?open=<app>&origin=<that site>):
+      // sign in there and go straight back.
+      const openKey = params.get('open')
+      if (openKey) {
+        history.replaceState(null, '', location.pathname + location.hash)
+        const tile = res.data.apps.find(t => t.key === openKey)
+        if (!tile) return toast('Only admins can open test sites.')
+        notice(`Opening ${tile.label}…`)
+        let out
+        try { out = await LauncherAuth.launch(openKey, params.get('origin') || '') } catch (e) { out = { status: 0 } }
+        if (out.status === 200 && out.data && out.data.url) { location.assign(out.data.url); return }
+        renderGrid(res.data)
+        return toast(esc((out.data && out.data.error) || `Could not open ${tile.label}.`))
+      }
+
       route()
     }
 

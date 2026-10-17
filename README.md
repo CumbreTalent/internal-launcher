@@ -169,13 +169,29 @@ itself to be shown inside `https://apps.offloadcrew.com` and nowhere else.
 Also add `quotes.offloadcrew.com` to the Quote Builder's production host list
 in `src/env.js`, or production shows the STAGING banner.
 
-## Lock staging
+## Staging is locked to admins (no Vercel login)
 
-Hiding a tile is not security. In Vercel, for `offload-quote-builder`, turn on
-**Settings → Deployment Protection → Vercel Authentication** (Standard
-Protection). `tradezip-admin` already has it. Don't add the VA to the Vercel
-team. The Admin Console's own password still works for anyone who has it, so
-keep it to admins.
+Every test build of the Quote Builder (QB Staging) and the Admin Console
+(Admin Staging) is locked by a small check in front of the site
+(`middleware.js` in each app, logic in `receiver/_gate.js`, copied to each app
+as `api/_gate.js`). It lets a browser in only after a launcher **admin or
+super admin** has opened that site from the launcher; that unlocks the browser
+for 12 hours. Anyone else sees "open this through the launcher". Assistants
+never get there: staging tiles are admin-only and the apps refuse their
+tickets too. Live sites are never affected.
+
+Coming from a locked page, "Open through the launcher" signs you in and sends
+you straight back to that exact test build. The launcher only ever sends
+tickets to that app's own test addresses (`previewHosts` in `api/_apps.js`).
+
+Needs `LAUNCHER_GATE_SECRET` (Preview) on each locked Vercel project. Vercel's
+own login (Deployment Protection → Vercel Authentication) is switched off on
+those projects, so admins sign in once, with the launcher. Stripe's webhook
+stays reachable on QB Staging; customer-facing test links (signing, payment,
+invitations) open only in a browser that came through the launcher.
+
+The Admin Console's own password still works for anyone who has it, so keep it
+to admins.
 
 ## Run it locally
 
