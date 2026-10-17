@@ -1,33 +1,13 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { APPS, roleFor, tilesFor, tileUrl } from '../api/_apps.js'
+import { APPS, roleFor, tilesFor, tileUrl, appFor } from '../api/_apps.js'
 import { verifyUser, bearerToken } from '../api/_auth.js'
 import handler from '../api/apps.js'
+import { fakeFetch, fakeRes, ENV } from './_helpers.mjs'
 
-const ENV = {
-  SUPABASE_URL: 'https://example.supabase.co',
-  SUPABASE_ANON_KEY: 'anon-key',
-  LAUNCHER_ADMIN_EMAILS: 'Owner@Offloadcrew.com',
-  LAUNCHER_VA_EMAILS: ' va@example.com , second.va@example.com ',
-}
 
-// Fake Supabase: a token of the form "tok:<email>" is valid for that email.
-const fakeFetch = async (url, opts) => {
-  assert.ok(url.endsWith('/auth/v1/user'), `unexpected url ${url}`)
-  assert.equal(opts.headers.apikey, ENV.SUPABASE_ANON_KEY)
-  const m = /^Bearer tok:(.+)$/.exec(opts.headers.Authorization || '')
-  if (!m) return { ok: false, status: 401, json: async () => ({ msg: 'invalid JWT' }) }
-  return { ok: true, status: 200, json: async () => ({ id: 'id-' + m[1], email: m[1] }) }
-}
+const VA_LABELS = ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'Workflows']
 
-function fakeRes() {
-  return {
-    statusCode: 0, body: null, headers: {},
-    setHeader(k, v) { this.headers[k] = v },
-    status(c) { this.statusCode = c; return this },
-    json(b) { this.body = b; return this },
-  }
-}
 const req = (token, method = 'GET') => ({ method, headers: token ? { authorization: `Bearer ${token}` } : {} })
 const call = (r, deps = {}) => { const res = fakeRes(); return handler(r, res, { env: ENV, fetchFn: fakeFetch, ...deps }).then(() => res) }
 
@@ -50,9 +30,10 @@ test('roleFor: nobody gets in when the lists are unset', () => {
 
 test('tilesFor: VA never receives staging or console tiles', () => {
   const va = tilesFor('va', ENV)
-  assert.deepEqual(va.map(t => t.label), ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'Workflows'])
+  assert.deepEqual(va.map(t => t.label), VA_LABELS)
   for (const t of va) {
     assert.ok(!/staging|tradezip-admin|console/i.test(t.url), `VA tile leaks ${t.url}`)
+    assert.ok(!/staging|console/.test(t.key), `VA tile leaks key ${t.key}`)
     assert.equal(t.badge, null)
   }
 })
@@ -71,8 +52,24 @@ test('tilesFor: unknown role gets nothing', () => {
 
 test('tilesFor: only the browser-safe fields are returned', () => {
   for (const t of tilesFor('admin', ENV)) {
-    assert.deepEqual(Object.keys(t).sort(), ['badge', 'color', 'icon', 'label', 'url'])
+    assert.deepEqual(Object.keys(t).sort(), ['badge', 'color', 'embed', 'icon', 'key', 'label', 'url'])
   }
+})
+
+test('staging tiles open in a tab; everything else may open inside the launcher', () => {
+  const byKey = Object.fromEntries(tilesFor('admin', ENV).map(t => [t.key, t]))
+  assert.equal(byKey['quotes-staging'].embed, false)
+  assert.equal(byKey['console-staging'].embed, false)
+  for (const k of ['quotes', 'console', 'training', 'invoices', 'workflows']) assert.equal(byKey[k].embed, true, k)
+})
+
+test('appFor: VA cannot resolve admin-only apps; unknown keys resolve to nothing', () => {
+  assert.equal(appFor('console', 'va'), null)
+  assert.equal(appFor('quotes-staging', 'va'), null)
+  assert.equal(appFor('nope', 'admin'), null)
+  assert.equal(appFor('quotes', 'va').key, 'quotes')
+  assert.equal(appFor('console', 'admin').key, 'console')
+  assert.equal(appFor('quotes', null), null)
 })
 
 test('custom-domain toggle switches every external tile, leaves Workflows alone', () => {
@@ -86,8 +83,11 @@ test('custom-domain toggle switches every external tile, leaves Workflows alone'
   assert.equal(tileUrl(wf, true), '/workflow.html')
 })
 
-test('every tile has a legacy and custom address, or a same-host url', () => {
+test('every tile has a legacy and custom address, or a same-host url; keys are unique', () => {
+  const keys = new Set()
   for (const a of APPS) {
+    assert.ok(!keys.has(a.key), `duplicate key ${a.key}`)
+    keys.add(a.key)
     if (a.url) { assert.match(a.url, /^\//); continue }
     assert.match(a.legacy, /^https:\/\//)
     assert.match(a.custom, /^https:\/\/[a-z-]+\.offloadcrew\.com$/)
@@ -133,7 +133,7 @@ test('GET /api/apps as the VA → 200 with only VA tiles', async () => {
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.role, 'va')
   assert.equal(res.body.email, 'VA@example.com')
-  assert.deepEqual(res.body.apps.map(t => t.label), ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'Workflows'])
+  assert.deepEqual(res.body.apps.map(t => t.label), VA_LABELS)
 })
 
 test('GET /api/apps as the admin → 200 with every tile', async () => {

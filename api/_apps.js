@@ -1,16 +1,22 @@
-// Tile list and role rules for the launcher.
+// Tile list and role rules for the Offload Crew Launcher.
 //
-// This file is server-side only: the underscore prefix keeps Vercel from
-// deploying it as a route, and /api/apps.js is the only thing that reads it.
-// A browser therefore only ever receives the tiles its role may open; the
-// staging and console addresses never ship to a virtual assistant.
+// Server-side only: the underscore prefix keeps Vercel from deploying it as a
+// route. A browser only ever receives the tiles its role may open, so the
+// staging and console addresses never reach a virtual assistant.
 
-// Each tile has two addresses:
-//   legacy — where the app lives today (Vercel's *.vercel.app hostnames)
-//   custom — where it will live once the offloadcrew.com subdomains are added
-//            in Vercel and DNS (see README, "Put it on offloadcrew.com")
-// Set LAUNCHER_USE_CUSTOM_DOMAINS=1 in the launcher's Vercel environment to
-// switch every tile at once. No code change needed.
+// Each tile:
+//   key     — stable id; also the app name inside launch tickets
+//   legacy  — where the app lives today (*.vercel.app)
+//   custom  — where it lives once the offloadcrew.com subdomains are added
+//             (flip LAUNCHER_USE_CUSTOM_DOMAINS=1 to switch every tile)
+//   url     — instead of legacy/custom, for pages inside the launcher itself
+//   sso     — the app has the /api/launch receiver, so opening it from the
+//             launcher signs the person in automatically
+//   embed   — open inside the launcher window. Only happens when the app and
+//             the launcher share a domain (offloadcrew.com); otherwise the app
+//             opens in a new tab. Staging stays in a new tab because Vercel's
+//             own sign-in page refuses to load inside another page.
+//   adminOnly, badge — as before
 export const APPS = [
   {
     key: 'quotes',
@@ -19,6 +25,8 @@ export const APPS = [
     color: 'linear-gradient(160deg, #e8651a, #b23b1a)',
     legacy: 'https://rqr-quote-builder.vercel.app',
     custom: 'https://quotes.offloadcrew.com',
+    sso: true,
+    embed: true,
   },
   {
     key: 'quotes-staging',
@@ -29,6 +37,8 @@ export const APPS = [
     adminOnly: true,
     legacy: 'https://rqr-quote-builder-git-staging-cumbretalent-5400s-projects.vercel.app',
     custom: 'https://quotes-staging.offloadcrew.com',
+    sso: true,
+    embed: false,
   },
   {
     key: 'console',
@@ -38,6 +48,8 @@ export const APPS = [
     adminOnly: true,
     legacy: 'https://tradezip-admin.vercel.app',
     custom: 'https://console.offloadcrew.com',
+    sso: true,
+    embed: true,
   },
   {
     key: 'console-staging',
@@ -48,30 +60,37 @@ export const APPS = [
     adminOnly: true,
     legacy: 'https://tradezip-admin-git-staging-cumbretalent-5400s-projects.vercel.app',
     custom: 'https://console-staging.offloadcrew.com',
+    sso: true,
+    embed: false,
   },
   {
     key: 'training',
     label: 'Crew Training',
     icon: 'ti-user-plus',
     color: 'linear-gradient(160deg, #3a9d5d, #1a7a3c)',
-    legacy: 'https://offload-crew-training.vercel.app/',
+    legacy: 'https://offload-crew-training.vercel.app',
     custom: 'https://training.offloadcrew.com',
+    sso: true,
+    embed: true,
   },
   {
     key: 'invoices',
     label: 'Invoice Chaser',
     icon: 'ti-cash-banknote',
     color: 'linear-gradient(160deg, #60a5fa, #2563eb)',
-    legacy: 'https://invoice-chaser-silk.vercel.app/',
+    legacy: 'https://invoice-chaser-silk.vercel.app',
     custom: 'https://invoices.offloadcrew.com',
+    sso: true,
+    embed: true,
   },
   {
-    // Lives inside this deployment, so the address is the same on any host.
     key: 'workflows',
     label: 'Workflows',
     icon: 'ti-route',
     color: 'linear-gradient(160deg, #9b6fd4, #5b3aa8)',
     url: '/workflow.html',
+    sso: false,
+    embed: true,
   },
   // Add more tiles by copying a block above. Mark anything a virtual
   // assistant must not see with `adminOnly: true`.
@@ -86,9 +105,8 @@ function parseList(value) {
     .filter(Boolean)
 }
 
-// Who may sign in, and as what. Both lists are comma-separated emails in the
-// launcher's environment. Admins are checked first, so an email in both lists
-// is an admin. Anyone else who authenticates is refused (403), which matters
+// Who may sign in, and as what. Admins are checked first, so an email on both
+// lists is an admin. Anyone else who authenticates is refused, which matters
 // because the Quote Builder's Supabase also holds customer accounts.
 export function roleFor(email, env = process.env) {
   const e = String(email || '').trim().toLowerCase()
@@ -107,18 +125,31 @@ export function tileUrl(app, custom) {
   return custom ? app.custom : app.legacy
 }
 
+export function allowed(app, role) {
+  return ROLES.includes(role) && (role === 'admin' || !app.adminOnly)
+}
+
+// The app with this key, if this role may open it; null otherwise (an unknown
+// key and a forbidden one look the same to the caller).
+export function appFor(key, role) {
+  const app = APPS.find(a => a.key === key)
+  return app && allowed(app, role) ? app : null
+}
+
 // The tiles a role may open, in display order, with only the fields the
 // browser needs to draw them.
 export function tilesFor(role, env = process.env) {
   if (!ROLES.includes(role)) return []
   const custom = useCustomDomains(env)
   return APPS
-    .filter(a => role === 'admin' || !a.adminOnly)
+    .filter(a => allowed(a, role))
     .map(a => ({
+      key: a.key,
       label: a.label,
       url: tileUrl(a, custom),
       icon: a.icon,
       color: a.color,
       badge: a.badge || null,
+      embed: a.embed !== false,
     }))
 }

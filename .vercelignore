@@ -2,3 +2,5 @@ tests
 README.md
 .env.example
 .claude
+receiver
+scripts
