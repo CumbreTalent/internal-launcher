@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Offload — Workflows</title>
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<script src="auth.js"></script>
+<script>
+  // Sign-in guard. Keep the page hidden until /api/apps confirms a signed-in,
+  // allowed account; otherwise send them to the launcher's sign-in form, which
+  // brings them back here afterwards. This is a convenience gate on a static
+  // file, not a security boundary — see "What this protects" in the README.
+  document.documentElement.style.visibility = 'hidden'
+  LauncherAuth.apps().then(function (r) {
+    if (r.status === 200) { document.documentElement.style.visibility = ''; return }
+    location.replace('./index.html?next=' + encodeURIComponent(location.pathname))
+  }).catch(function () { document.documentElement.style.visibility = '' })
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />

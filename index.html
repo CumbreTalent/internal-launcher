@@ -20,7 +20,8 @@
 
   <style>
     /* ───────────────────────────────────────────────
-       EDIT YOUR APPS IN THE <script> BLOCK AT THE BOTTOM
+       The tiles are NOT in this file any more. They come from /api/apps
+       after sign-in, filtered by role. Edit them in api/_apps.js.
        ─────────────────────────────────────────────── */
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; }
@@ -76,12 +77,6 @@
     .app:active .icon { transform: scale(0.92); }
     .label { font-size: 12.5px; font-weight: 500; text-align: center; max-width: 78px; line-height: 1.25; text-shadow: 0 1px 6px rgba(0,0,0,0.5); }
 
-    .badge-soon {
-      position: absolute; top: -6px; right: -6px;
-      background: #ff453a; color: #fff;
-      font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    }
     .badge-test {
       position: absolute; top: -6px; right: -6px;
       background: #ffcc00; color: #1a1200;
@@ -89,7 +84,44 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
 
-    .footer { margin-top: auto; padding: 36px 0 20px; font-size: 11px; opacity: 0.4; letter-spacing: 0.04em; }
+    /* ── Sign-in card ── */
+    .card {
+      width: 100%; max-width: 360px;
+      margin-top: 40px; padding: 28px 24px 22px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+    }
+    .card h2 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+    .card p { font-size: 13px; opacity: 0.6; margin-bottom: 18px; line-height: 1.4; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .field label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.55; }
+    .field input {
+      font: inherit; font-size: 15px; color: #fff;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.14); border-radius: 10px;
+      padding: 11px 12px; outline: none;
+    }
+    .field input:focus { border-color: rgba(255,255,255,0.45); }
+    .btn {
+      width: 100%; font: inherit; font-size: 15px; font-weight: 600;
+      color: #0b1020; background: #fff; border: 0; border-radius: 10px;
+      padding: 12px; margin-top: 6px; cursor: pointer;
+    }
+    .btn[disabled] { opacity: 0.6; cursor: default; }
+    .error { color: #ff7b72; font-size: 13px; margin-top: 10px; min-height: 1.2em; line-height: 1.35; }
+
+    /* ── Status / blocked message ── */
+    .notice { max-width: 360px; margin-top: 56px; text-align: center; font-size: 14px; line-height: 1.5; opacity: 0.8; }
+    .notice a, .who a { color: inherit; text-decoration: underline; cursor: pointer; }
+    .notice a { display: inline-block; margin-top: 12px; }
+
+    .footer { margin-top: auto; padding: 36px 0 20px; font-size: 11px; opacity: 0.4; letter-spacing: 0.04em; text-align: center; line-height: 1.8; }
+    .who { display: block; }
+
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -99,102 +131,123 @@
     <div class="greeting" id="greeting">Internal Apps</div>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="grid hidden" id="grid"></div>
 
-  <div class="footer">Offload · internal use only</div>
+  <form class="card hidden" id="login" autocomplete="on" novalidate>
+    <h2>Sign in</h2>
+    <p>Use your Quote Builder email and password.</p>
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" required>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn" id="submit" type="submit">Continue</button>
+    <div class="error" id="error" role="alert"></div>
+  </form>
 
+  <div class="notice" id="notice">Loading…</div>
+
+  <div class="footer">
+    <span>Offload · internal use only</span>
+    <span class="who hidden" id="who"></span>
+  </div>
+
+  <script src="auth.js"></script>
   <script>
-    /* ════════════════════════════════════════════════════
-       EDIT YOUR APPS HERE
-       - url:   where the icon links (full https URL)
-       - label: text under the icon
-       - icon:  any Tabler icon name → https://tabler.io/icons
-       - color: CSS background for the tile (gradient or solid)
-       - soon:  optional, set true to show a "SOON" badge + disable
-       ════════════════════════════════════════════════════ */
-    const APPS = [
-      {
-        label: 'Quote Builder',
-        url: 'https://rqr-quote-builder.vercel.app',
-        icon: 'ti-file-invoice',
-        color: 'linear-gradient(160deg, #e8651a, #b23b1a)',
-      },
-      {
-        label: 'QB Staging',
-        url: 'https://rqr-quote-builder-git-staging-cumbretalent-5400s-projects.vercel.app',
-        icon: 'ti-flask',
-        color: 'linear-gradient(160deg, #d4a017, #8a6d0f)',
-        badge: 'TEST',
-      },
-      {
-        label: 'Admin Console',
-        url: 'https://tradezip-admin.vercel.app',
-        icon: 'ti-shield-lock',
-        color: 'linear-gradient(160deg, #2dd4bf, #0f766e)',
-      },
-      {
-        label: 'Admin Staging',
-        url: 'https://tradezip-admin-git-staging-cumbretalent-5400s-projects.vercel.app',
-        icon: 'ti-shield-lock',
-        color: 'linear-gradient(160deg, #d4a017, #8a6d0f)',
-        badge: 'TEST',
-      },
-      {
-        label: 'Crew Training',
-        url: 'https://offload-crew-training.vercel.app/',
-        icon: 'ti-user-plus',
-        color: 'linear-gradient(160deg, #3a9d5d, #1a7a3c)',
-      },
-      {
-        label: 'Invoice Chaser',
-        url: 'https://invoice-chaser-silk.vercel.app/',
-        icon: 'ti-cash-banknote',
-        color: 'linear-gradient(160deg, #60a5fa, #2563eb)',
-      },
-      {
-        label: 'Workflows',
-        url: 'workflow.html',
-        icon: 'ti-route',
-        color: 'linear-gradient(160deg, #9b6fd4, #5b3aa8)',
-      },
-      // Add more apps by copying a block above ↑
-    ];
+    const $ = id => document.getElementById(id)
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
-    // ── Render the grid ──
-    const grid = document.getElementById('grid');
-    grid.innerHTML = APPS.map(a => {
-      const isPlaceholder = a.url.includes('YOUR-') || a.soon;
-      const href = isPlaceholder ? 'javascript:void(0)' : a.url;
-      const target = isPlaceholder ? '' : 'target="_blank" rel="noopener"';
-      const badgeHtml = isPlaceholder
-        ? '<span class="badge-soon">SET URL</span>'
-        : (a.badge ? `<span class="badge-test">${a.badge}</span>` : '');
-      return `
-        <a class="app" href="${href}" ${target}>
-          <div class="icon" style="background:${a.color}">
-            <i class="ti ${a.icon}"></i>
-            ${badgeHtml}
+    function show(which) {
+      ['grid', 'login', 'notice'].forEach(id => $(id).classList.toggle('hidden', id !== which))
+    }
+
+    // ── Grid: drawn from whatever /api/apps returned for this role ──
+    function renderGrid({ apps, email, role }) {
+      $('grid').innerHTML = apps.map(a => `
+        <a class="app" href="${esc(a.url)}" target="_blank" rel="noopener">
+          <div class="icon" style="background:${esc(a.color)}">
+            <i class="ti ${esc(a.icon)}"></i>
+            ${a.badge ? `<span class="badge-test">${esc(a.badge)}</span>` : ''}
           </div>
-          <div class="label">${a.label}</div>
-        </a>`;
-    }).join('');
+          <div class="label">${esc(a.label)}</div>
+        </a>`).join('')
+      $('who').innerHTML = `${esc(email)} · ${role === 'admin' ? 'Admin' : 'Virtual assistant'} · <a id="signout">Sign out</a>`
+      $('who').classList.remove('hidden')
+      $('signout').onclick = async () => {
+        $('who').classList.add('hidden')
+        await LauncherAuth.signOut()
+        show('login')
+        $('email').focus()
+      }
+      show('grid')
+    }
+
+    function notice(message, linkText, onClick) {
+      $('notice').innerHTML = `<p>${esc(message)}</p>${linkText ? `<a id="notice-link">${esc(linkText)}</a>` : ''}`
+      if (linkText) $('notice-link').onclick = onClick
+      show('notice')
+    }
+
+    // ── Boot: 401 → sign-in form, 403 → not allowed, 200 → grid ──
+    async function boot() {
+      notice('Loading…')
+      let res
+      try { res = await LauncherAuth.apps() }
+      catch (e) { return notice(e.message || 'Could not reach the launcher.', 'Try again', boot) }
+
+      if (res.status === 401) { show('login'); $('email').focus(); return }
+      if (res.status === 403) {
+        return notice((res.data && res.data.error) || 'This account is not allowed here.', 'Use a different account', async () => {
+          await LauncherAuth.signOut(); show('login'); $('email').value = ''; $('email').focus()
+        })
+      }
+      if (res.status !== 200 || !res.data) {
+        return notice((res.data && res.data.error) || 'Something went wrong loading your apps.', 'Try again', boot)
+      }
+
+      // Arrived via a guarded page (workflow.html sends ?next=/workflow.html).
+      const next = new URLSearchParams(location.search).get('next')
+      if (next && /^\/[^/\\]/.test(next)) { location.replace(next); return }
+
+      renderGrid(res.data)
+    }
+
+    $('login').addEventListener('submit', async e => {
+      e.preventDefault()
+      $('error').textContent = ''
+      const email = $('email').value.trim()
+      const password = $('password').value
+      if (!email || !password) { $('error').textContent = 'Enter your email and password.'; return }
+      $('submit').disabled = true
+      try {
+        await LauncherAuth.signIn(email, password)
+        $('password').value = ''
+        await boot()
+      } catch (err) {
+        $('error').textContent = err.message || 'Sign-in failed.'
+      } finally {
+        $('submit').disabled = false
+      }
+    })
 
     // ── Live clock ──
     function tick() {
-      const now = new Date();
-      let h = now.getHours();
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12 || 12;
-      document.getElementById('clock').textContent = `${h}:${m}`;
-      document.getElementById('date').textContent =
-        now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-      const hr = now.getHours();
-      document.getElementById('greeting').textContent =
-        hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+      const now = new Date()
+      let h = now.getHours()
+      const m = String(now.getMinutes()).padStart(2, '0')
+      h = h % 12 || 12
+      $('clock').textContent = `${h}:${m}`
+      $('date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      const hr = now.getHours()
+      $('greeting').textContent = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening'
     }
-    tick();
-    setInterval(tick, 1000);
+    tick()
+    setInterval(tick, 1000)
+
+    boot()
   </script>
 </body>
 </html>

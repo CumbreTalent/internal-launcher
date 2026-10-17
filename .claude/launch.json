@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "launcher",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8745", "--directory", "/Users/omarelseaidy/Documents/GitHub/internal-launcher"],
-      "port": 8745
+      "name": "launcher-mock",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tests/mock-server.mjs"],
+      "port": 8746
     }
   ]
 }
