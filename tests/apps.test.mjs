@@ -38,11 +38,21 @@ test('tilesFor: VA never receives staging or console tiles', () => {
   }
 })
 
-test('tilesFor: admin receives every tile in order', () => {
+test('tilesFor: admin receives every visible tile in order', () => {
   const admin = tilesFor('admin', ENV)
-  assert.equal(admin.length, APPS.length)
-  assert.deepEqual(admin.map(t => t.label), APPS.map(a => a.label))
+  const visible = APPS.filter(a => !a.hidden)
+  assert.equal(admin.length, visible.length)
+  assert.deepEqual(admin.map(t => t.label), visible.map(a => a.label))
+  assert.deepEqual(admin.map(t => t.label), ['Quote Builder', 'QB Staging', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'Workflows'])
   assert.equal(admin.find(t => t.label === 'QB Staging').badge, 'TEST')
+})
+
+test('hidden tiles reach nobody: the live Admin Console is hidden from admins too', () => {
+  assert.equal(APPS.find(a => a.key === 'console').hidden, true)
+  for (const role of ['admin', 'va']) {
+    assert.ok(!tilesFor(role, ENV).some(t => t.key === 'console'), role)
+    assert.equal(appFor('console', role), null, role)
+  }
 })
 
 test('tilesFor: unknown role gets nothing', () => {
@@ -60,7 +70,7 @@ test('staging tiles open in a tab; everything else may open inside the launcher'
   const byKey = Object.fromEntries(tilesFor('admin', ENV).map(t => [t.key, t]))
   assert.equal(byKey['quotes-staging'].embed, false)
   assert.equal(byKey['console-staging'].embed, false)
-  for (const k of ['quotes', 'console', 'training', 'invoices', 'workflows']) assert.equal(byKey[k].embed, true, k)
+  for (const k of ['quotes', 'training', 'invoices', 'workflows']) assert.equal(byKey[k].embed, true, k)
 })
 
 test('appFor: VA cannot resolve admin-only apps; unknown keys resolve to nothing', () => {
@@ -68,7 +78,7 @@ test('appFor: VA cannot resolve admin-only apps; unknown keys resolve to nothing
   assert.equal(appFor('quotes-staging', 'va'), null)
   assert.equal(appFor('nope', 'admin'), null)
   assert.equal(appFor('quotes', 'va').key, 'quotes')
-  assert.equal(appFor('console', 'admin').key, 'console')
+  assert.equal(appFor('console-staging', 'admin').key, 'console-staging')
   assert.equal(appFor('quotes', null), null)
 })
 
@@ -136,11 +146,12 @@ test('GET /api/apps as the VA → 200 with only VA tiles', async () => {
   assert.deepEqual(res.body.apps.map(t => t.label), VA_LABELS)
 })
 
-test('GET /api/apps as the admin → 200 with every tile', async () => {
+test('GET /api/apps as the admin → 200 with every visible tile', async () => {
   const res = await call(req('tok:owner@offloadcrew.com'))
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.role, 'admin')
-  assert.equal(res.body.apps.length, APPS.length)
+  assert.equal(res.body.apps.length, APPS.filter(a => !a.hidden).length)
+  assert.ok(!res.body.apps.some(t => t.key === 'console'))
 })
 
 test('POST /api/apps → 405', async () => {

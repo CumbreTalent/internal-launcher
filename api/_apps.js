@@ -17,6 +17,8 @@
 //             opens in a new tab. Staging stays in a new tab because Vercel's
 //             own sign-in page refuses to load inside another page.
 //   adminOnly, badge — as before
+//   hidden  — kept in the list but shown to nobody, admins included, and
+//             cannot be launched (for an app that is temporarily broken)
 export const APPS = [
   {
     key: 'quotes',
@@ -46,6 +48,10 @@ export const APPS = [
     icon: 'ti-shield-lock',
     color: 'linear-gradient(160deg, #2dd4bf, #0f766e)',
     adminOnly: true,
+    // Hidden until the live console is configured: its Vercel Production env
+    // has no SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY, so every API call fails.
+    // Use Admin Staging meanwhile. Delete this line to bring the tile back.
+    hidden: true,
     legacy: 'https://tradezip-admin.vercel.app',
     custom: 'https://console.offloadcrew.com',
     sso: true,
@@ -126,7 +132,7 @@ export function tileUrl(app, custom) {
 }
 
 export function allowed(app, role) {
-  return ROLES.includes(role) && (role === 'admin' || !app.adminOnly)
+  return !app.hidden && ROLES.includes(role) && (role === 'admin' || !app.adminOnly)
 }
 
 // The app with this key, if this role may open it; null otherwise (an unknown

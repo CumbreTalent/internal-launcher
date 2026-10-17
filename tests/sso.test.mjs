@@ -94,11 +94,17 @@ test('launch: VA gets a signed address for an app they may open', async () => {
 })
 
 test('launch: string bodies are parsed; custom domains are used when switched on', async () => {
-  const res = await callLaunch(lreq('tok:owner@offloadcrew.com', JSON.stringify({ app: 'console' })), { ...LAUNCHER_ENV, LAUNCHER_USE_CUSTOM_DOMAINS: '1' })
+  const res = await callLaunch(lreq('tok:owner@offloadcrew.com', JSON.stringify({ app: 'console-staging' })), { ...LAUNCHER_ENV, LAUNCHER_USE_CUSTOM_DOMAINS: '1' })
   assert.equal(res.statusCode, 200)
   const u = new URL(res.body.url)
-  assert.equal(u.origin, 'https://console.offloadcrew.com')
-  assert.equal(verifyTicket(u.searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'console', now: NOW }).claims.role, 'admin')
+  assert.equal(u.origin, 'https://console-staging.offloadcrew.com')
+  assert.equal(verifyTicket(u.searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'console-staging', now: NOW }).claims.role, 'admin')
+})
+
+test('launch: a hidden app cannot be launched, even by an admin', async () => {
+  const res = await callLaunch(lreq('tok:owner@offloadcrew.com', { app: 'console' }))
+  assert.equal(res.statusCode, 404)
+  assert.equal(res.body.url, undefined)
 })
 
 test('launch: VA asking for an admin app gets the same 404 as an unknown app', async () => {

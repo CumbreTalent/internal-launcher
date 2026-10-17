@@ -7,13 +7,18 @@ you have opened keep running, so switching between them is instant.
 
 | Role | Sees |
 |---|---|
-| **Admin** | every tile, including QB Staging, Admin Console and Admin Staging |
+| **Admin** | every tile, including QB Staging and Admin Staging |
 | **Virtual assistant (VA)** | Quote Builder, Crew Training, Invoice Chaser, Workflows |
 
 People sign in with their **Quote Builder email and password**. Which role
 someone gets is decided by two email allowlists in the launcher's settings.
 Anyone else who signs in is refused, so a Tradezip customer account cannot see
 internal tiles even though it lives in the same Supabase.
+
+The live **Admin Console** tile is hidden for now, for everyone: that
+deployment has no database settings in Vercel, so it cannot load data. Use
+Admin Staging. To bring it back, configure tradezip-admin's Production env,
+then delete the `hidden: true` line on its tile in `api/_apps.js`.
 
 The tile list lives on the server (`api/_apps.js`) and reaches the browser
 already filtered by role: a VA's browser never receives the staging or console
