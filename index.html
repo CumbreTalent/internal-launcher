@@ -120,6 +120,14 @@
     }
     .btn[disabled] { opacity: 0.6; cursor: default; }
     .error { color: #ff7b72; font-size: 13px; margin-top: 10px; min-height: 1.2em; line-height: 1.35; }
+    .btn.ghost { background: rgba(255,255,255,0.10); color: #fff; }
+
+    /* ── Change-password sheet ── */
+    .sheet {
+      position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+      padding: 16px; background: rgba(5,8,18,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    }
+    .sheet .card { margin-top: 0; background: rgba(20,26,46,0.96); }
 
     .notice { max-width: 360px; margin-top: 56px; text-align: center; font-size: 14px; line-height: 1.5; opacity: 0.8; }
     .notice a, .who a { color: inherit; text-decoration: underline; cursor: pointer; }
@@ -252,6 +260,24 @@
     <div class="frames" id="frames"></div>
   </section>
 
+  <div class="sheet hidden" id="pw-sheet" role="dialog" aria-modal="true" aria-labelledby="pw-title">
+    <form class="card" id="pw-form" novalidate>
+      <h2 id="pw-title">Change password</h2>
+      <p>This is the password you use for the launcher and the Quote Builder.</p>
+      <div class="field">
+        <label for="pw-new">New password</label>
+        <input id="pw-new" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+      <div class="field">
+        <label for="pw-again">New password again</label>
+        <input id="pw-again" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+      <button class="btn" id="pw-save" type="submit">Save password</button>
+      <button class="btn ghost" id="pw-cancel" type="button">Cancel</button>
+      <div class="error" id="pw-error" role="alert"></div>
+    </form>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="auth.js"></script>
@@ -312,9 +338,11 @@
       $('grid').querySelectorAll('.app').forEach(btn => {
         btn.onclick = () => openTile(tiles.find(t => t.key === btn.dataset.key), btn)
       })
-      $('who').innerHTML = `${esc(email)} · ${role === 'admin' ? 'Admin' : 'Virtual assistant'} · <a id="signout">Sign out</a>`
+      const roleLabel = { superadmin: 'Super admin', admin: 'Admin', va: 'Assistant' }[role] || role
+      $('who').innerHTML = `${esc(email)} · ${esc(roleLabel)} · <a id="changepw">Change password</a> · <a id="signout">Sign out</a>`
       $('who').classList.remove('hidden')
       $('signout').onclick = signOut
+      $('changepw').onclick = openPasswordForm
       show('grid')
     }
     function markRunning() {
@@ -484,7 +512,35 @@
       if (rec.home) window.open(rec.home, '_blank', 'noopener')
       else openExternal(rec.tile)
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && current) go(null) })
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && current && $('pw-sheet').classList.contains('hidden')) go(null) })
+
+    // ── Change password ──
+    function openPasswordForm() {
+      $('pw-error').textContent = ''
+      $('pw-new').value = ''; $('pw-again').value = ''
+      $('pw-sheet').classList.remove('hidden')
+      $('pw-new').focus()
+    }
+    function closePasswordForm() { $('pw-sheet').classList.add('hidden') }
+    $('pw-cancel').onclick = closePasswordForm
+    $('pw-sheet').addEventListener('click', e => { if (e.target === $('pw-sheet')) closePasswordForm() })
+    $('pw-sheet').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closePasswordForm() } })
+    $('pw-form').addEventListener('submit', async e => {
+      e.preventDefault()
+      const a = $('pw-new').value, b = $('pw-again').value
+      if (a.length < 8) { $('pw-error').textContent = 'Use at least 8 characters.'; return }
+      if (a !== b) { $('pw-error').textContent = 'The two passwords don’t match.'; return }
+      $('pw-save').disabled = true
+      try {
+        await LauncherAuth.changePassword(a)
+        closePasswordForm()
+        toast('Password changed. Use it next time you sign in.')
+      } catch (err) {
+        $('pw-error').textContent = err.message || 'Could not change your password.'
+      } finally {
+        $('pw-save').disabled = false
+      }
+    })
 
     // ── Session ──
     async function signOut() {

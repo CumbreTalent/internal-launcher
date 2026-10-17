@@ -7,13 +7,17 @@ you have opened keep running, so switching between them is instant.
 
 | Role | Sees |
 |---|---|
-| **Admin** | every tile, including QB Staging and Admin Staging |
-| **Virtual assistant (VA)** | Quote Builder, Crew Training, Invoice Chaser, Workflows |
+| **Super admin** | every tile, plus **People**, where people are added and removed |
+| **Admin** | every tile except People: Quote Builder, QB Staging, Admin Staging, Crew Training, Invoice Chaser, Workflows |
+| **Assistant** | Quote Builder, Crew Training, Invoice Chaser, Workflows |
 
-People sign in with their **Quote Builder email and password**. Which role
-someone gets is decided by two email allowlists in the launcher's settings.
-Anyone else who signs in is refused, so a Tradezip customer account cannot see
-internal tiles even though it lives in the same Supabase.
+People sign in with their **Quote Builder** login. The super admin is set only
+by `LAUNCHER_SUPERADMIN_EMAILS` in Vercel, so no screen can create one.
+Everyone else's role is stored on their own Quote Builder login (Supabase
+`app_metadata.launcher_role`), which only the server can write, and is managed
+on the People screen. Anyone else who signs in is refused, so a Tradezip
+customer account cannot see internal tiles even though it lives in the same
+Supabase.
 
 The live **Admin Console** tile is hidden for now, for everyone: that
 deployment has no database settings in Vercel, so it cannot load data. Use
@@ -21,8 +25,30 @@ Admin Staging. To bring it back, configure tradezip-admin's Production env,
 then delete the `hidden: true` line on its tile in `api/_apps.js`.
 
 The tile list lives on the server (`api/_apps.js`) and reaches the browser
-already filtered by role: a VA's browser never receives the staging or console
-addresses at all.
+already filtered by role: an assistant's browser never receives the staging,
+console or People addresses at all.
+
+## Adding and removing people (super admin)
+
+Open **People**. Type a name and email, pick Admin or Assistant, and click
+**Add person**.
+
+- **New to the Quote Builder:** a login is created and a temporary password is
+  shown once. Send it to them privately with the launcher address. They sign
+  in and use **Change password** at the bottom of the home screen. A new
+  admin is also made a Quote Builder admin; a new assistant keeps the Quote
+  Builder's default assistant role.
+- **Already has a Quote Builder login:** they get launcher access and keep
+  their own password.
+- **Their other tools:** nothing to do. Invoice Chaser and Crew Training
+  create their account the first time they open it from the launcher: admins
+  as admins, assistants as members (Invoice Chaser) and trainees (Crew
+  Training). QB Staging and the Admin Console don't create accounts.
+
+Each row also has **Reset password** (a new temporary password, shown once)
+and **Remove**, which takes away launcher access at once. Their accounts in
+each tool stay, so nothing they made is lost; those accounts have no password
+unless they set one through that tool's own "forgot password".
 
 ## How one sign-in reaches every app
 
@@ -34,12 +60,13 @@ its own way:
 
 | App | How it signs you in |
 |---|---|
-| Quote Builder, Invoice Chaser, Crew Training | finds your profile there by email and starts a normal Supabase session for it |
+| Quote Builder | finds your profile by email and starts a normal Supabase session for it |
+| Invoice Chaser, Crew Training | the same, and if you have no account yet, creates one first (no password; role from the launcher) |
 | Admin Console | admins only; issues its usual 12-hour session, as the shared password would |
 
-Each app still has the final say. No account in that app under the same email,
-or deactivated access in the Quote Builder, means no sign-in, with a page that
-says so. Nothing is ever created in an app by the launcher.
+A super admin opens apps as an admin; apps only know admin and assistant.
+Apps keep the final say on everything else: deactivated access in the Quote
+Builder, for example, still means no sign-in, with a page that says so.
 
 The receiving code is `receiver/_launcher.js`. Every app carries an identical
 copy as `api/_launcher.js` (`api/_launcher.mjs` in Crew Training) next to a
@@ -71,12 +98,12 @@ This writes `.launcher-keys.txt`, which git ignores, with two values.
 
 | Name | Value |
 |---|---|
-| `SUPABASE_URL` | the Quote Builder **production** project URL (`VITE_SUPABASE_URL` there) |
+| `SUPABASE_URL` | the Quote Builder **live** project URL (`VITE_SUPABASE_URL` there) |
 | `SUPABASE_ANON_KEY` | the matching anon key (`VITE_SUPABASE_ANON_KEY` there) |
-| `LAUNCHER_ADMIN_EMAILS` | admin emails, comma-separated |
-| `LAUNCHER_VA_EMAILS` | VA emails, comma-separated |
+| `SUPABASE_SERVICE_ROLE_KEY` | the same project's service key, marked Sensitive. Used only by the People screen, behind the super-admin check, to create logins and set roles |
+| `LAUNCHER_SUPERADMIN_EMAILS` | the super admin's email (comma-separated if ever more than one) |
 | `LAUNCHER_USE_CUSTOM_DOMAINS` | `0` until the offloadcrew.com addresses work, then `1` |
-| `LAUNCHER_SIGNING_KEY` | from `.launcher-keys.txt` — add this **last**, once every app below is deployed |
+| `LAUNCHER_SIGNING_KEY` | from `.launcher-keys.txt`. Add this **last**, once every app below is deployed |
 
 Tick Production and Preview for each. Until `LAUNCHER_SIGNING_KEY` is set, the
 launcher works and each app simply asks for its own login, as before.
@@ -90,8 +117,8 @@ launcher works and each app simply asks for its own login, as before.
 | invoice-chaser | `LAUNCHER_PUBLIC_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from that app's Supabase project (Settings → API) |
 | offload-crew-training | `LAUNCHER_PUBLIC_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from that app's Supabase project |
 
-The Quote Builder and Admin Console already have their service keys. Each
-person needs an account in each app under the **same email** as the launcher.
+The Quote Builder and Admin Console already have their service keys. Invoice
+Chaser and Crew Training need theirs to create accounts on a first visit.
 
 Check an app is ready by opening `<app address>/api/launch` directly. It
 should say "Open this app from the Offload Crew Launcher". If it says
@@ -111,12 +138,15 @@ Open `api/_apps.js`. Each tile is one object:
   custom: 'https://quotes.offloadcrew.com',       // where it lives after the domain move
   sso: true,                                      // the app has /api/launch
   embed: true,                                    // may open inside the launcher
-  adminOnly: true,                                // optional: hide from the VA
+  adminOnly: true,                                // optional: admins and super admin only
+  superadminOnly: true,                           // optional: super admin only
+  hidden: true,                                   // optional: nobody, for a broken app
   badge: 'TEST',                                  // optional: little yellow tag
 }
 ```
 
-`npm test` checks that no admin-only address can reach a VA.
+`npm test` checks that no admin-only address can reach an assistant, and that
+People stays super-admin only.
 
 ## Put it on offloadcrew.com
 
@@ -153,22 +183,29 @@ keep it to admins.
 npm run dev:mock
 ```
 
-Opens everything at `http://localhost:8746`: the launcher, a fake Supabase,
-and six fake apps that run the real receiver code. Three throwaway accounts
-are listed at the top of `tests/mock-server.mjs`.
+Opens everything at `http://localhost:8746`: the launcher, a fake Supabase
+project per app, and six fake apps that run the real receiver code, including
+automatic accounts. Throwaway sign-ins for each role are listed at the top of
+`tests/mock-server.mjs`.
 
 ```bash
 npm test
 ```
 
-runs the role, ticket and receiver tests with Node's built-in runner.
+runs the role, People, ticket and receiver tests with Node's built-in runner.
 
 ## What this protects, and what it does not
 
 - The browser only ever receives its role's tiles.
+- Only the super admin can add, change or remove people; the server checks
+  this on every request. The super admin can't be created or removed from any
+  screen, only in Vercel.
+- The launcher holds the Quote Builder's service key so People can create
+  logins. It is used only behind the super-admin check and never reaches a
+  browser.
 - Tickets last 60 seconds, name one app, and are signed with a key only the
-  launcher holds. A ticket for one app is refused by every other app; a VA's
-  ticket can never open the Admin Console.
+  launcher holds. A ticket for one app is refused by every other app; an
+  assistant's ticket can never open the Admin Console.
 - Tickets travel in the app's address, so someone with access to your browser
   history could reuse one within its 60 seconds. Sessions themselves travel
   the way Supabase's own magic links do, in the part of the address servers

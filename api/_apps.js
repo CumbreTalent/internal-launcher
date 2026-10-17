@@ -16,7 +16,9 @@
 //             the launcher share a domain (offloadcrew.com); otherwise the app
 //             opens in a new tab. Staging stays in a new tab because Vercel's
 //             own sign-in page refuses to load inside another page.
-//   adminOnly, badge — as before
+//   adminOnly      — admins and the super admin only (hidden from assistants)
+//   superadminOnly — the super admin only
+//   badge          — little yellow tag
 //   hidden  — kept in the list but shown to nobody, admins included, and
 //             cannot be launched (for an app that is temporarily broken)
 export const APPS = [
@@ -98,29 +100,61 @@ export const APPS = [
     sso: false,
     embed: true,
   },
-  // Add more tiles by copying a block above. Mark anything a virtual
-  // assistant must not see with `adminOnly: true`.
+  {
+    // Inside the launcher: add people, set their role, remove access.
+    key: 'people',
+    label: 'People',
+    icon: 'ti-users',
+    color: 'linear-gradient(160deg, #64748b, #334155)',
+    url: '/people.html',
+    superadminOnly: true,
+    sso: false,
+    embed: true,
+  },
+  // Add more tiles by copying a block above. Mark anything an assistant must
+  // not see with `adminOnly: true`, and super-admin-only tools with
+  // `superadminOnly: true`.
 ]
 
-export const ROLES = ['admin', 'va']
+// Three roles:
+//   superadmin — set ONLY by LAUNCHER_SUPERADMIN_EMAILS in Vercel, so no screen
+//                can create one. Sees everything, including People.
+//   admin      — every tool except People.
+//   va         — virtual assistant: the everyday tools only.
+// Admins and assistants are stored on their Quote Builder login, in Supabase
+// app_metadata.launcher_role, which only the server (service key) can write.
+// The People screen manages it. Anyone else who signs in is refused, which
+// matters because the Quote Builder's Supabase also holds customer accounts.
+export const ROLES = ['superadmin', 'admin', 'va']
+export const ASSIGNABLE_ROLES = ['admin', 'va']
+export const ROLE_LABEL = { superadmin: 'Super admin', admin: 'Admin', va: 'Assistant' }
 
-function parseList(value) {
+export function parseList(value) {
   return String(value || '')
     .split(',')
     .map(s => s.trim().toLowerCase())
     .filter(Boolean)
 }
 
-// Who may sign in, and as what. Admins are checked first, so an email on both
-// lists is an admin. Anyone else who authenticates is refused, which matters
-// because the Quote Builder's Supabase also holds customer accounts.
-export function roleFor(email, env = process.env) {
-  const e = String(email || '').trim().toLowerCase()
-  if (!e) return null
-  if (parseList(env.LAUNCHER_ADMIN_EMAILS).includes(e)) return 'admin'
-  if (parseList(env.LAUNCHER_VA_EMAILS).includes(e)) return 'va'
-  return null
+export const normEmail = e => String(e || '').trim().toLowerCase()
+
+export function isSuperadminEmail(email, env = process.env) {
+  const e = normEmail(email)
+  return !!e && parseList(env.LAUNCHER_SUPERADMIN_EMAILS).includes(e)
 }
+
+// user: { email, appMetadata } as returned by verifyUser / the admin API.
+export function roleFor(user, env = process.env) {
+  if (!user || !normEmail(user.email)) return null
+  if (isSuperadminEmail(user.email, env)) return 'superadmin'
+  const r = user.appMetadata && user.appMetadata.launcher_role
+  return ASSIGNABLE_ROLES.includes(r) ? r : null
+}
+
+export const isAdminLevel = role => role === 'superadmin' || role === 'admin'
+
+// Apps only know admin and assistant: a super admin opens them as an admin.
+export const ticketRole = role => (isAdminLevel(role) ? 'admin' : role)
 
 export function useCustomDomains(env = process.env) {
   return env.LAUNCHER_USE_CUSTOM_DOMAINS === '1'
@@ -132,7 +166,10 @@ export function tileUrl(app, custom) {
 }
 
 export function allowed(app, role) {
-  return !app.hidden && ROLES.includes(role) && (role === 'admin' || !app.adminOnly)
+  if (app.hidden || !ROLES.includes(role)) return false
+  if (app.superadminOnly) return role === 'superadmin'
+  if (app.adminOnly) return isAdminLevel(role)
+  return true
 }
 
 // The app with this key, if this role may open it; null otherwise (an unknown

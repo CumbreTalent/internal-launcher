@@ -13,6 +13,9 @@
 //   3. The app's /api/launch?ticket=… route verifies it with the launcher's
 //      PUBLIC key (LAUNCHER_PUBLIC_KEY), then signs the person in with the
 //      app's own login system and redirects into the app.
+//   4. Apps that opt in (`provision`) create the person's account on their
+//      first visit, with a role taken from the launcher role. Apps that don't
+//      opt in refuse anyone without an account, as before.
 //
 // No dependencies; Node 18+ (global fetch, node:crypto Ed25519).
 
@@ -69,7 +72,8 @@ export function verifyTicket(token, { publicKey, audience, now = Date.now() } = 
   if (claims.exp - claims.iat > MAX_TTL_S) return { ok: false, reason: 'malformed' }
   if (claims.exp < nowS - CLOCK_SKEW_S) return { ok: false, reason: 'expired' }
 
-  return { ok: true, claims: { ...claims, sub: claims.sub.trim().toLowerCase() } }
+  const name = typeof claims.name === 'string' ? claims.name.trim().slice(0, 120) : ''
+  return { ok: true, claims: { ...claims, sub: claims.sub.trim().toLowerCase(), name: name || null } }
 }
 
 // Production deployments answer to `production`, everything else (the
@@ -209,6 +213,38 @@ export async function callRpc({ url, serviceKey, fn, args = {}, fetchFn = fetch 
   return { exists: true, value: body }
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+// Makes a login for someone the launcher vouched for, on their first visit to
+// an app that opts in. No password is set: they come in through the launcher.
+// The app's own sign-up trigger creates the profile; this waits for it, then
+// sets the role. Resolves to the profile row.
+export async function provisionAccount({ url, serviceKey, email, name, role, fetchFn = fetch, wait = sleep }) {
+  const base = url.replace(/\/+$/, '')
+  const r = await fetchFn(`${base}/auth/v1/admin/users`, {
+    method: 'POST', headers: adminHeaders(serviceKey),
+    body: JSON.stringify({ email, email_confirm: true, user_metadata: { full_name: name || email.split('@')[0] } }),
+  })
+  const user = await readJson(r)
+  if (!r.ok || !user || !user.id) {
+    throw new Error(r.status === 422 ? 'a login exists for this email but has no profile' : `create user failed (${r.status})`)
+  }
+  let profile = null
+  for (let i = 0; i < 8 && !profile; i++) {
+    profile = await findProfileByEmail({ url, serviceKey, email, select: 'id,email,role', fetchFn })
+    if (!profile) await wait(250)
+  }
+  if (!profile) throw new Error('the app did not create a profile for the new login')
+  if (profile.id !== user.id) throw new Error('account mismatch')
+  if (role && profile.role !== role) {
+    const p = await fetchFn(`${base}/rest/v1/profiles?id=eq.${encodeURIComponent(profile.id)}`, {
+      method: 'PATCH', headers: { ...adminHeaders(serviceKey), Prefer: 'return=minimal' }, body: JSON.stringify({ role }),
+    })
+    if (!p.ok) throw new Error(`could not set the new profile's role (${p.status})`)
+  }
+  return profile
+}
+
 // Creates a fresh session for an EXISTING user without their password:
 // generate a magic link server-side (no email is sent) and redeem it
 // immediately. Refuses if Supabase would have created a new account.
@@ -237,12 +273,15 @@ export async function mintSession({ url, serviceKey, email, expectUserId, fetchF
   throw new Error('verify rejected the link')
 }
 
-// The whole flow for a Supabase app: verify the ticket, find the profile, run
-// the app's own extra check, mint a session, redirect into the app.
-//   check(profile) → null to allow, or { title, message } to refuse.
+// The whole flow for a Supabase app: verify the ticket, find the profile (or
+// create it, if the app opts in), run the app's own extra check, mint a
+// session, redirect into the app.
+//   check(profile)  → null to allow, or { title, message } to refuse.
+//   provision       → { admin: '<app role>', va: '<app role>' } to create
+//                     missing accounts with that role; omit to refuse instead.
 export async function supabaseLaunch(req, res, {
-  appName, audience, supabaseUrl, serviceKey, select = 'id,email', check, path = '/',
-  env = process.env, fetchFn = fetch, now = Date.now(),
+  appName, audience, supabaseUrl, serviceKey, select = 'id,email', check, provision, path = '/',
+  env = process.env, fetchFn = fetch, now = Date.now(), wait,
 } = {}) {
   const claims = receive(req, res, { appName, audience, env, now })
   if (!claims) return
@@ -254,7 +293,11 @@ export async function supabaseLaunch(req, res, {
     })
   }
   try {
-    const profile = await findProfileByEmail({ url: supabaseUrl, serviceKey, email: claims.sub, select, fetchFn })
+    let profile = await findProfileByEmail({ url: supabaseUrl, serviceKey, email: claims.sub, select, fetchFn })
+    if (!profile && provision && provision[claims.role]) {
+      await provisionAccount({ url: supabaseUrl, serviceKey, email: claims.sub, name: claims.name, role: provision[claims.role], fetchFn, ...(wait ? { wait } : {}) })
+      profile = await findProfileByEmail({ url: supabaseUrl, serviceKey, email: claims.sub, select, fetchFn })
+    }
     if (!profile) {
       return sendPage(res, 403, {
         title: `No ${appName} account for ${claims.sub}`,

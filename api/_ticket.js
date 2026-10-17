@@ -22,7 +22,9 @@ function privateKeyFrom(raw) {
   return key
 }
 
-export function signTicket({ aud, sub, role }, signingKey, { now = Date.now(), ttl = TICKET_TTL_S } = {}) {
+// `name` is optional; apps use it as the display name when they create an
+// account for someone on their first visit.
+export function signTicket({ aud, sub, role, name }, signingKey, { now = Date.now(), ttl = TICKET_TTL_S } = {}) {
   const iat = Math.floor(now / 1000)
   const payload = {
     iss: TICKET_ISSUER,
@@ -33,6 +35,7 @@ export function signTicket({ aud, sub, role }, signingKey, { now = Date.now(), t
     exp: iat + ttl,
     jti: crypto.randomUUID(),
   }
+  if (typeof name === 'string' && name.trim()) payload.name = name.trim().slice(0, 120)
   const head = `${TICKET_PREFIX}.${b64url(JSON.stringify(payload))}`
   const sig = crypto.sign(null, Buffer.from(head), privateKeyFrom(signingKey))
   return `${head}.${b64url(sig)}`

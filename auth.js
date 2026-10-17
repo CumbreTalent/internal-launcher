@@ -157,5 +157,53 @@
     return out
   }
 
-  window.LauncherAuth = { signIn: signIn, signOut: signOut, session: session, apps: apps, launch: launch, clear: clear }
+  // Any launcher API call with the current session: { status, data }. Same
+  // refresh-once-on-401 behaviour as apps().
+  async function api(path, opts) {
+    opts = opts || {}
+    const send = function (token) {
+      return fetch(path, {
+        method: opts.method || 'GET',
+        headers: Object.assign({ Authorization: 'Bearer ' + token }, opts.body ? { 'Content-Type': 'application/json' } : {}),
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+        cache: 'no-store',
+      }).then(function (r) { return r.json().catch(function () { return null }).then(function (d) { return { status: r.status, data: d } }) })
+    }
+    let s = await session()
+    if (!s) return { status: 401, data: null }
+    let out = await send(s.access_token)
+    if (out.status === 401) {
+      s = await refresh(s)
+      if (!s) return { status: 401, data: null }
+      out = await send(s.access_token)
+      if (out.status === 401) clear()
+    }
+    return out
+  }
+
+  // Sets a new password for the signed-in person (their Quote Builder login).
+  async function changePassword(password) {
+    const s = await session()
+    if (!s) throw new Error('Your session has expired. Sign in again.')
+    const c = await config()
+    let r
+    try {
+      r = await fetch(c.supabaseUrl + '/auth/v1/user', {
+        method: 'PUT',
+        headers: { apikey: c.supabaseAnonKey, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: password }),
+      })
+    } catch (e) {
+      throw new Error('Could not reach the sign-in service. Check your connection and try again.')
+    }
+    const data = await r.json().catch(() => ({}))
+    if (!r.ok) {
+      const m = String(data.msg || data.message || data.error_description || data.error || '')
+      if (/different from the old/i.test(m)) throw new Error('Choose a password different from your current one.')
+      if (/reauthenticat/i.test(m)) throw new Error('For security, sign out, sign back in, then change your password straight away.')
+      throw new Error(m || 'Could not change your password.')
+    }
+  }
+
+  window.LauncherAuth = { signIn: signIn, signOut: signOut, session: session, apps: apps, launch: launch, api: api, changePassword: changePassword, clear: clear }
 })()

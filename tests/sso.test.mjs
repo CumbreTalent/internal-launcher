@@ -6,7 +6,7 @@ import { signTicket, generateKeyPair, publicKeyFor, TICKET_TTL_S } from '../api/
 import launch from '../api/launch.js'
 import {
   verifyTicket, audienceFor, receive, supabaseLaunch, sendSessionRedirect,
-  findProfileByEmail, callRpc, mintSession,
+  findProfileByEmail, callRpc, mintSession, provisionAccount,
 } from '../receiver/_launcher.js'
 import { fakeFetch, fakeRes } from './_helpers.mjs'
 
@@ -17,8 +17,7 @@ const NOW = Date.UTC(2026, 9, 17, 12, 0, 0)
 const LAUNCHER_ENV = {
   SUPABASE_URL: 'https://example.supabase.co',
   SUPABASE_ANON_KEY: 'anon-key',
-  LAUNCHER_ADMIN_EMAILS: 'owner@offloadcrew.com',
-  LAUNCHER_VA_EMAILS: 'va@example.com',
+  LAUNCHER_SUPERADMIN_EMAILS: 'owner@offloadcrew.com',
   LAUNCHER_SIGNING_KEY: KEYS.signingKey,
 }
 
@@ -99,6 +98,19 @@ test('launch: string bodies are parsed; custom domains are used when switched on
   const u = new URL(res.body.url)
   assert.equal(u.origin, 'https://console-staging.offloadcrew.com')
   assert.equal(verifyTicket(u.searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'console-staging', now: NOW }).claims.role, 'admin')
+})
+
+test('launch: the super admin opens apps as an admin, and tickets carry the name', async () => {
+  const res = await callLaunch(lreq('tok:owner@offloadcrew.com', { app: 'invoices' }))
+  const claims = verifyTicket(new URL(res.body.url).searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'invoices', now: NOW }).claims
+  assert.equal(claims.role, 'admin')
+  assert.equal(claims.name, 'Name owner@offloadcrew.com')
+})
+
+test('launch: People is a launcher page for the super admin only', async () => {
+  assert.deepEqual((await callLaunch(lreq('tok:owner@offloadcrew.com', { app: 'people' }))).body, { url: '/people.html', sso: false })
+  assert.equal((await callLaunch(lreq('tok:admin2@example.com', { app: 'people' }))).statusCode, 404)
+  assert.equal((await callLaunch(lreq('tok:va@example.com', { app: 'people' }))).statusCode, 404)
 })
 
 test('launch: a hidden app cannot be launched, even by an admin', async () => {
@@ -195,18 +207,35 @@ test('sendSessionRedirect: tokens go in the fragment, never the query', () => {
 })
 
 // A tiny in-memory Supabase: profiles, an RPC, generate_link and verify.
-function fakeSupabase({ profiles = [], rpc = {}, users = {}, failVerifyType = null } = {}) {
+function fakeSupabase({ profiles = [], rpc = {}, users = {}, failVerifyType = null, defaultRole = 'member', trigger = true, createStatus = 200 } = {}) {
   const calls = []
   const issued = new Map()
+  let nextId = 1
   const json = (status, body) => ({ ok: status < 400, status, text: async () => JSON.stringify(body) })
   const fn = async (url, opts = {}) => {
     const u = new URL(url)
     calls.push(`${opts.method || 'GET'} ${u.pathname}`)
     assert.equal(opts.headers.apikey, 'service-key')
     assert.equal(opts.headers.Authorization, 'Bearer service-key')
-    if (u.pathname === '/rest/v1/profiles') {
+    if (u.pathname === '/rest/v1/profiles' && (opts.method || 'GET') === 'GET') {
       const email = u.searchParams.get('email').replace(/^eq\./, '')
       return json(200, profiles.filter(p => p.email === email))
+    }
+    if (u.pathname === '/rest/v1/profiles' && opts.method === 'PATCH') {
+      const id = u.searchParams.get('id').replace(/^eq\./, '')
+      const row = profiles.find(p => p.id === id)
+      Object.assign(row, JSON.parse(opts.body))
+      return json(204, null)
+    }
+    if (u.pathname === '/auth/v1/admin/users' && opts.method === 'POST') {
+      if (createStatus !== 200) return json(createStatus, { msg: 'A user with this email address has already been registered' })
+      const body = JSON.parse(opts.body)
+      assert.equal(body.email_confirm, true)
+      assert.equal(body.password, undefined, 'automatic accounts get no password')
+      const id = 'new-' + nextId++
+      users[body.email] = { id }
+      if (trigger) profiles.push({ id, email: body.email, role: defaultRole, full_name: body.user_metadata.full_name })
+      return json(200, { id, email: body.email })
     }
     if (u.pathname.startsWith('/rest/v1/rpc/')) {
       const name = u.pathname.split('/').pop()
@@ -310,6 +339,66 @@ test('supabaseLaunch: Supabase errors become a retry page, not a crash', async (
     assert.equal(res.statusCode, 502)
     assert.match(res.text, /Try again/)
   } finally { console.error = logged }
+})
+
+// ── Automatic accounts (apps that opt in with `provision`) ──
+
+const PROVISION = { admin: 'admin', va: 'member' }
+const noWait = async () => {}
+
+test('provision: an assistant without an account gets one, with the assistant role, and is signed in', async () => {
+  const sb = fakeSupabase({ profiles: [], users: {}, defaultRole: 'member' })
+  const res = await launchApp(ticket({ sub: 'new.va@example.com', name: 'New VA' }), sb, { provision: PROVISION, wait: noWait })
+  assert.equal(res.statusCode, 302)
+  assert.equal(new URLSearchParams(res.headers.Location.split('#')[1]).get('access_token'), 'AT-new.va@example.com')
+  assert.ok(sb.calls.includes('POST /auth/v1/admin/users'))
+  assert.ok(!sb.calls.includes('PATCH /rest/v1/profiles'), 'role already matched the default')
+})
+
+test('provision: a launcher admin gets the app\'s admin role', async () => {
+  const profiles = []
+  const sb = fakeSupabase({ profiles, users: {}, defaultRole: 'applicant' })
+  const res = await launchApp(ticket({ sub: 'asad@offloadcrew.com', role: 'admin' }), sb, { provision: { admin: 'admin', va: 'applicant' }, wait: noWait })
+  assert.equal(res.statusCode, 302)
+  assert.equal(profiles[0].role, 'admin')
+  assert.equal(profiles[0].full_name, 'asad', 'falls back to the email name when the ticket has none')
+  assert.ok(sb.calls.includes('PATCH /rest/v1/profiles'))
+})
+
+test('provision: existing accounts are left exactly as they are', async () => {
+  const sb = fakeSupabase(SB)
+  const res = await launchApp(ticket({ role: 'admin' }), sb, { provision: PROVISION, wait: noWait })
+  assert.equal(res.statusCode, 302)
+  assert.ok(!sb.calls.includes('POST /auth/v1/admin/users'))
+  assert.ok(!sb.calls.includes('PATCH /rest/v1/profiles'))
+})
+
+test('provision: apps that do not opt in still refuse, and create nothing', async () => {
+  const sb = fakeSupabase({ profiles: [], users: {} })
+  const res = await launchApp(ticket({ sub: 'new.va@example.com' }), sb, { wait: noWait })
+  assert.equal(res.statusCode, 403)
+  assert.ok(!sb.calls.includes('POST /auth/v1/admin/users'))
+})
+
+test('provision: a login with no profile, or an app with no sign-up trigger, fails cleanly', async () => {
+  const logged = console.error; console.error = () => {}
+  try {
+    let res = await launchApp(ticket({ sub: 'half@example.com' }), fakeSupabase({ createStatus: 422 }), { provision: PROVISION, wait: noWait })
+    assert.equal(res.statusCode, 502)
+    res = await launchApp(ticket({ sub: 'half@example.com' }), fakeSupabase({ trigger: false }), { provision: PROVISION, wait: noWait })
+    assert.equal(res.statusCode, 502)
+    assert.match(res.text, /Could not sign you in/)
+  } finally { console.error = logged }
+})
+
+test('provisionAccount: waits for the sign-up trigger before giving up', async () => {
+  const profiles = []
+  const sb = fakeSupabase({ profiles, trigger: false })
+  let waits = 0
+  const wait = async () => { waits++; if (waits === 2) profiles.push({ id: 'new-1', email: 'late@example.com', role: 'member' }) }
+  const p = await provisionAccount({ url: 'https://a.supabase.co', serviceKey: 'service-key', email: 'late@example.com', role: 'member', fetchFn: sb, wait })
+  assert.equal(p.id, 'new-1')
+  assert.equal(waits, 2)
 })
 
 test('callRpc: missing function is reported, not thrown', async () => {
