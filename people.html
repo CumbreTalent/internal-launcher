@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>People · Offload Crew</title>
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<script src="auth.js"></script>
+<script>
+  // Same guard as Workflows: no session → launcher sign-in, then back here.
+  document.documentElement.style.visibility = 'hidden'
+  if (window.top !== window.self) document.documentElement.classList.add('in-launcher')
+  LauncherAuth.session().then(function (s) {
+    if (s) { document.documentElement.style.visibility = ''; return }
+    location.replace('./index.html?next=' + encodeURIComponent(location.pathname))
+  }).catch(function () { document.documentElement.style.visibility = '' })
+</script>
+<style>
+  :root {
+    --bg: #0b1020; --card: rgba(255,255,255,0.05); --line: rgba(255,255,255,0.10); --ink: #fff;
+    --muted: rgba(255,255,255,0.6); --faint: rgba(255,255,255,0.4); --field: rgba(0,0,0,0.28);
+    --danger: #ff7b72; --ok: #7ee2a8; --accent: #fff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', -apple-system, system-ui, sans-serif; color: var(--ink); min-height: 100vh;
+    background:
+      radial-gradient(900px 600px at 15% 0%, #1f2a52 0%, transparent 55%),
+      radial-gradient(900px 600px at 100% 100%, #3a1f52 0%, transparent 55%),
+      var(--bg);
+    padding: 24px 16px 48px;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  .wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .sub { font-size: 14px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+  .back { color: var(--muted); font-size: 14px; text-decoration: none; white-space: nowrap; }
+  .in-launcher .back { display: none; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
+  .card h2 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+
+  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .form { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label, .field .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+  .field input {
+    background: var(--field); border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; padding: 11px 12px; outline: none; font-size: 15px;
+  }
+  .field input:focus { border-color: rgba(255,255,255,0.45); }
+
+  .roles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .role-opt { position: relative; }
+  .role-opt input { position: absolute; opacity: 0; }
+  .role-opt label {
+    display: block; cursor: pointer; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; padding: 12px; background: var(--field);
+    text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--ink); font-weight: 600;
+  }
+  .role-opt label span { display: block; font-weight: 400; font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+  .role-opt input:checked + label { border-color: #fff; box-shadow: 0 0 0 1px #fff inset; }
+  .role-opt input:focus-visible + label { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 2px; }
+
+  .actions { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+  .btn { border: 0; border-radius: 10px; padding: 11px 16px; font-weight: 600; font-size: 14.5px; cursor: pointer; background: #fff; color: var(--bg); }
+  .btn[disabled] { opacity: 0.6; cursor: default; }
+  .btn.ghost { background: rgba(255,255,255,0.10); color: var(--ink); }
+  .btn.small { padding: 7px 11px; font-size: 13px; }
+  .btn.danger { background: rgba(255,123,114,0.16); color: var(--danger); }
+  .msg { font-size: 13.5px; line-height: 1.4; }
+  .msg.err { color: var(--danger); }
+  .msg.ok { color: var(--ok); }
+
+  .secret { margin-top: 14px; border: 1px solid rgba(126,226,168,0.35); background: rgba(126,226,168,0.08); border-radius: 14px; padding: 16px; }
+  .secret h3 { font-size: 14.5px; font-weight: 600; margin-bottom: 6px; }
+  .secret p { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+  .pw { display: flex; align-items: center; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
+  .pw code { font: 600 17px/1 ui-monospace, 'SF Mono', Menlo, monospace; letter-spacing: 0.04em; background: rgba(0,0,0,0.35); padding: 10px 12px; border-radius: 10px; user-select: all; }
+
+  .list { display: flex; flex-direction: column; }
+  .row { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+  .row:first-child { border-top: 0; padding-top: 0; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; background: rgba(255,255,255,0.10); }
+  .who { min-width: 0; }
+  .who .name { font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .who .meta { font-size: 12.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .pill { font-size: 12px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: rgba(255,204,0,0.16); color: #ffd84d; }
+  select.role { background: var(--field); border: 1px solid rgba(255,255,255,0.14); border-radius: 9px; padding: 6px 8px; font-size: 13px; }
+  .confirm { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); flex-wrap: wrap; justify-content: flex-end; }
+  @media (max-width: 560px) {
+    .row { grid-template-columns: 36px 1fr; }
+    .controls, .confirm { grid-column: 1 / -1; justify-content: flex-start; }
+  }
+  .empty { color: var(--muted); font-size: 14px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>People</h1>
+      <p class="sub">Only you can see this. Everyone listed here can sign in to the launcher, and their accounts in each tool are made for them the first time they open it.</p>
+    </div>
+    <a class="back" href="./index.html">&larr; Apps</a>
+  </div>
+
+  <div class="card hidden" id="blocked"><p class="msg err" id="blocked-msg"></p></div>
+
+  <section class="card" id="add-card">
+    <h2>Add a person</h2>
+    <form id="add" class="form" novalidate>
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" autocomplete="off" placeholder="Asad Khan">
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="name@offloadcrew.com">
+      </div>
+      <div class="field full">
+        <span class="lbl" id="role-lbl">Role</span>
+        <div class="roles" role="radiogroup" aria-labelledby="role-lbl">
+          <div class="role-opt">
+            <input type="radio" name="role" id="role-va" value="va" checked>
+            <label for="role-va">Assistant<span>Quote Builder, Crew Training, Invoice Chaser, Workflows</span></label>
+          </div>
+          <div class="role-opt">
+            <input type="radio" name="role" id="role-admin" value="admin">
+            <label for="role-admin">Admin<span>Every tool, including staging. Can’t add people.</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="field full">
+        <div class="actions">
+          <button class="btn" id="add-btn" type="submit">Add person</button>
+          <span class="msg" id="add-msg" role="status"></span>
+        </div>
+      </div>
+    </form>
+    <div class="secret hidden" id="secret">
+      <h3 id="secret-title"></h3>
+      <div class="pw"><code id="secret-pw"></code><button class="btn ghost small" id="copy" type="button">Copy</button></div>
+      <p id="secret-help"></p>
+      <div class="actions" style="margin-top:12px"><button class="btn ghost small" id="secret-done" type="button">Done</button></div>
+    </div>
+  </section>
+
+  <section class="card" id="list-card">
+    <h2>Who has access</h2>
+    <div class="list" id="list"><p class="empty">Loading…</p></div>
+  </section>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id)
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+  const LABEL = { superadmin: 'Super admin', admin: 'Admin', va: 'Assistant' }
+  let people = []
+
+  function initials(p) {
+    const src = (p.name || p.email).replace(/@.*/, '')
+    const parts = src.split(/[\s._-]+/).filter(Boolean)
+    return ((parts[0] || '?')[0] + (parts[1] ? parts[1][0] : '')).toUpperCase()
+  }
+  function when(iso) {
+    if (!iso) return 'Never signed in'
+    const d = new Date(iso)
+    return 'Last signed in ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() === new Date().getFullYear() ? undefined : 'numeric' })
+  }
+
+  function showSecret(title, pw, help) {
+    $('secret-title').textContent = title
+    $('secret-pw').textContent = pw
+    $('secret-help').textContent = help
+    $('secret').classList.remove('hidden')
+    $('copy').textContent = 'Copy'
+    $('secret').scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }
+  $('secret-done').onclick = () => { $('secret').classList.add('hidden'); $('secret-pw').textContent = '' }
+  $('copy').onclick = async () => {
+    try { await navigator.clipboard.writeText($('secret-pw').textContent); $('copy').textContent = 'Copied' }
+    catch (e) { $('copy').textContent = 'Select and copy' }
+  }
+
+  function blocked(message) {
+    $('blocked-msg').textContent = message
+    $('blocked').classList.remove('hidden')
+    $('add-card').classList.add('hidden')
+    $('list-card').classList.add('hidden')
+  }
+
+  async function load() {
+    const r = await LauncherAuth.api('/api/people')
+    if (r.status === 401) return location.replace('./index.html?next=' + encodeURIComponent(location.pathname))
+    if (r.status === 403) return blocked('Only the super admin can manage people.')
+    if (r.status !== 200 || !r.data) return blocked((r.data && r.data.error) || 'Could not load people. Try again.')
+    people = r.data.people
+    render()
+  }
+
+  function render() {
+    if (!people.length) { $('list').innerHTML = '<p class="empty">No one yet.</p>'; return }
+    $('list').innerHTML = people.map((p, i) => `
+      <div class="row" data-i="${i}">
+        <div class="avatar" aria-hidden="true">${esc(initials(p))}</div>
+        <div class="who">
+          <div class="name">${esc(p.name || p.email)}</div>
+          <div class="meta">${p.name ? esc(p.email) + ' · ' : ''}${esc(when(p.lastSignIn))}</div>
+        </div>
+        ${p.fixed
+          ? `<div class="controls"><span class="pill">Super admin</span></div>`
+          : `<div class="controls">
+               <select class="role" aria-label="Role for ${esc(p.email)}">
+                 <option value="va"${p.role === 'va' ? ' selected' : ''}>Assistant</option>
+                 <option value="admin"${p.role === 'admin' ? ' selected' : ''}>Admin</option>
+               </select>
+               <button class="btn ghost small" data-act="reset" type="button">Reset password</button>
+               <button class="btn danger small" data-act="remove" type="button">Remove</button>
+             </div>`}
+      </div>`).join('')
+
+    $('list').querySelectorAll('.row').forEach(row => {
+      const p = people[Number(row.dataset.i)]
+      if (p.fixed) return
+      const sel = row.querySelector('select.role')
+      sel.onchange = async () => {
+        sel.disabled = true
+        const r = await LauncherAuth.api('/api/people', { method: 'PATCH', body: { email: p.email, role: sel.value } })
+        sel.disabled = false
+        if (r.status === 200) { p.role = sel.value; setMsg(`${p.name || p.email} is now ${LABEL[p.role] === 'Admin' ? 'an Admin' : 'an Assistant'}.`, 'ok') }
+        else { sel.value = p.role; setMsg((r.data && r.data.error) || 'Could not change the role.', 'err') }
+      }
+      row.querySelector('[data-act=reset]').onclick = async e => {
+        e.target.disabled = true
+        const r = await LauncherAuth.api('/api/people', { method: 'PATCH', body: { email: p.email, resetPassword: true } })
+        e.target.disabled = false
+        if (r.status === 200) showSecret(`New temporary password for ${p.name || p.email}`, r.data.tempPassword,
+          'Their old password no longer works. Send them this one privately. They sign in to the launcher, then use Change password at the bottom of the home screen.')
+        else setMsg((r.data && r.data.error) || 'Could not reset the password.', 'err')
+      }
+      row.querySelector('[data-act=remove]').onclick = () => {
+        const controls = row.querySelector('.controls')
+        controls.outerHTML = `<div class="confirm">Remove ${esc(p.name || p.email)}?
+          <button class="btn danger small" data-act="yes" type="button">Yes, remove</button>
+          <button class="btn ghost small" data-act="no" type="button">Cancel</button></div>`
+        row.querySelector('[data-act=no]').onclick = render
+        row.querySelector('[data-act=yes]').onclick = async e => {
+          e.target.disabled = true
+          const r = await LauncherAuth.api('/api/people', { method: 'DELETE', body: { email: p.email } })
+          if (r.status === 200) { setMsg(`${p.name || p.email} can no longer use the launcher. Their work in each tool is kept.`, 'ok'); load() }
+          else { setMsg((r.data && r.data.error) || 'Could not remove them.', 'err'); render() }
+        }
+      }
+    })
+  }
+
+  function setMsg(text, kind) {
+    $('add-msg').textContent = text
+    $('add-msg').className = 'msg ' + (kind || '')
+  }
+
+  $('add').addEventListener('submit', async e => {
+    e.preventDefault()
+    const name = $('name').value.trim()
+    const email = $('email').value.trim()
+    const role = document.querySelector('input[name=role]:checked').value
+    if (!email) return setMsg('Enter their email.', 'err')
+    $('add-btn').disabled = true
+    setMsg('Adding…')
+    const r = await LauncherAuth.api('/api/people', { method: 'POST', body: { name, email, role } })
+    $('add-btn').disabled = false
+    if (r.status === 201) {
+      setMsg('')
+      showSecret(`${name || email} can now sign in as ${role === 'admin' ? 'an Admin' : 'an Assistant'}`, r.data.tempPassword,
+        `This is their temporary password. Send it to them privately, with the launcher address. After signing in, they use Change password at the bottom of the home screen.${r.data.note ? ' ' + r.data.note : ''}`)
+      $('name').value = ''; $('email').value = ''
+      load()
+    } else if (r.status === 200) {
+      const what = { unchanged: 'already has that role.', granted: 'already had a Quote Builder login. They now have launcher access and sign in with their existing password.', 'role-changed': 'already had access. Their role is updated.' }[r.data.status] || 'is updated.'
+      setMsg(`${email} ${what}`, 'ok')
+      $('name').value = ''; $('email').value = ''
+      load()
+    } else {
+      setMsg((r.data && r.data.error) || 'Could not add them. Try again.', 'err')
+    }
+  })
+
+  load()
+</script>
+</body>
+</html>

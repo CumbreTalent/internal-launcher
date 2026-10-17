@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Offload · Internal Apps</title>
+  <title>Offload Crew Launcher</title>
 
-  <!-- iOS "Add to Home Screen" support -->
+  <!-- iOS "Add to Home Screen" / installed-app support -->
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Offload">
+  <meta name="apple-mobile-web-app-title" content="Offload Crew">
+  <meta name="application-name" content="Offload Crew Launcher">
   <meta name="theme-color" content="#0b1020">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -19,68 +21,75 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 
   <style>
-    /* ───────────────────────────────────────────────
-       EDIT YOUR APPS IN THE <script> BLOCK AT THE BOTTOM
-       ─────────────────────────────────────────────── */
+    /* The tiles are not in this file. They come from /api/apps after sign-in,
+       filtered by role. Edit them in api/_apps.js. */
+    :root {
+      --ink: #fff;
+      --night: #0b1020;
+      --glass: rgba(255,255,255,0.06);
+      --glass-line: rgba(255,255,255,0.10);
+      --bar: rgba(11,16,32,0.86);
+      --ease: cubic-bezier(.2,.8,.2,1);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; }
     body {
       font-family: 'DM Sans', -apple-system, system-ui, sans-serif;
-      color: #fff;
-      min-height: 100dvh;
+      color: var(--ink);
+      background-color: var(--night);
+      overflow: hidden;
+    }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+    /* ── Home screen ── */
+    .home {
+      position: fixed; inset: 0;
+      overflow-y: auto; overflow-x: hidden;
+      display: flex; flex-direction: column; align-items: center;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
       /* Wallpaper — deep gradient, swap colors to taste */
       background:
         radial-gradient(1200px 800px at 20% 10%, #1f2a52 0%, transparent 55%),
         radial-gradient(1000px 700px at 85% 90%, #3a1f52 0%, transparent 55%),
         linear-gradient(160deg, #0b1020 0%, #0d1228 60%, #0a0f1e 100%);
-      background-attachment: fixed;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
-      overflow-x: hidden;
+      transition: transform .32s var(--ease), filter .32s var(--ease);
     }
+    body.app-open .home { transform: scale(0.96); filter: brightness(0.6) blur(2px); }
 
-    /* ── Clock / header ── */
     .top { width: 100%; max-width: 540px; text-align: center; padding: 48px 0 8px; }
+    .brand { font-size: 11px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.5; margin-bottom: 14px; }
     .clock { font-size: 64px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; text-shadow: 0 2px 20px rgba(0,0,0,0.4); }
     .date { font-size: 16px; font-weight: 500; opacity: 0.85; margin-top: 6px; }
     .greeting { font-size: 13px; font-weight: 500; opacity: 0.55; margin-top: 18px; text-transform: uppercase; letter-spacing: 0.12em; }
 
-    /* ── App grid ── */
     .grid {
-      width: 100%;
-      max-width: 540px;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 22px 8px;
-      padding: 40px 4px 0;
+      width: 100%; max-width: 540px;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 22px 8px; padding: 40px 4px 0;
     }
     @media (max-width: 420px) { .grid { grid-template-columns: repeat(3, 1fr); gap: 24px 4px; } }
 
-    .app { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: #fff; }
+    .app { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .app:focus-visible { outline: none; }
+    .app:focus-visible .icon { box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 8px 22px rgba(0,0,0,0.35); }
     .icon {
-      width: 64px; height: 64px;
-      border-radius: 16px;
+      width: 64px; height: 64px; border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 30px;
+      font-size: 30px; position: relative;
       box-shadow: 0 8px 22px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
-      position: relative;
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      transition: transform 0.12s ease;
     }
     .icon::after {
-      content: ''; position: absolute; inset: 0; border-radius: 16px;
+      content: ''; position: absolute; inset: 0; border-radius: inherit;
       background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 45%);
       pointer-events: none;
     }
     .app:active .icon { transform: scale(0.92); }
-    .label { font-size: 12.5px; font-weight: 500; text-align: center; max-width: 78px; line-height: 1.25; text-shadow: 0 1px 6px rgba(0,0,0,0.5); }
-
-    .badge-soon {
-      position: absolute; top: -6px; right: -6px;
-      background: #ff453a; color: #fff;
-      font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    .label { font-size: 12.5px; font-weight: 500; text-align: center; max-width: 78px; line-height: 1.25; text-shadow: 0 1px 6px rgba(0,0,0,0.5); position: relative; }
+    /* Running app: a small dot under the label, like a dock */
+    .app.running .label::after {
+      content: ''; position: absolute; left: 50%; bottom: -8px; width: 4px; height: 4px;
+      margin-left: -2px; border-radius: 50%; background: rgba(255,255,255,0.8);
     }
     .badge-test {
       position: absolute; top: -6px; right: -6px;
@@ -89,112 +98,522 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
 
-    .footer { margin-top: auto; padding: 36px 0 20px; font-size: 11px; opacity: 0.4; letter-spacing: 0.04em; }
+    /* ── Sign-in card ── */
+    .card {
+      width: 100%; max-width: 360px; margin-top: 40px; padding: 28px 24px 22px;
+      border-radius: 20px; background: var(--glass); border: 1px solid var(--glass-line);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+    }
+    .card h2 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+    .card p { font-size: 13px; opacity: 0.6; margin-bottom: 18px; line-height: 1.4; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .field label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.55; }
+    .field input {
+      font: inherit; font-size: 15px; color: #fff; background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; padding: 11px 12px; outline: none;
+    }
+    .field input:focus { border-color: rgba(255,255,255,0.45); }
+    .btn {
+      width: 100%; font-size: 15px; font-weight: 600; color: var(--night); background: #fff;
+      border-radius: 10px; padding: 12px; margin-top: 6px;
+    }
+    .btn[disabled] { opacity: 0.6; cursor: default; }
+    .error { color: #ff7b72; font-size: 13px; margin-top: 10px; min-height: 1.2em; line-height: 1.35; }
+    .btn.ghost { background: rgba(255,255,255,0.10); color: #fff; }
+
+    /* ── Change-password sheet ── */
+    .sheet {
+      position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+      padding: 16px; background: rgba(5,8,18,0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    }
+    .sheet .card { margin-top: 0; background: rgba(20,26,46,0.96); }
+
+    .notice { max-width: 360px; margin-top: 56px; text-align: center; font-size: 14px; line-height: 1.5; opacity: 0.8; }
+    .notice a, .who a { color: inherit; text-decoration: underline; cursor: pointer; }
+    .notice a { display: inline-block; margin-top: 12px; }
+
+    .footer { margin-top: auto; padding: 36px 0 20px; font-size: 11px; opacity: 0.4; letter-spacing: 0.04em; text-align: center; line-height: 1.8; }
+    .who { display: block; }
+
+    /* ── App window ── */
+    .stage {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; flex-direction: column;
+      background: var(--night);
+      opacity: 0; transform: scale(0.9); pointer-events: none;
+      transition: opacity .26s var(--ease), transform .32s var(--ease);
+      border-radius: 18px; overflow: hidden;
+    }
+    body.app-open .stage { opacity: 1; transform: none; pointer-events: auto; border-radius: 0; }
+
+    .appbar {
+      flex: none; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      gap: 8px; padding: env(safe-area-inset-top) 8px 0; height: calc(48px + env(safe-area-inset-top));
+      background: var(--bar); border-bottom: 1px solid var(--glass-line);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    }
+    .bar-btn {
+      display: inline-flex; align-items: center; gap: 2px; height: 36px; padding: 0 10px;
+      border-radius: 10px; font-size: 15px; font-weight: 500; opacity: 0.9;
+    }
+    .bar-btn:hover { background: rgba(255,255,255,0.08); }
+    .bar-btn:focus-visible { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 1px; }
+    .bar-btn i { font-size: 20px; }
+    .bar-btn.icon-only { width: 36px; padding: 0; justify-content: center; }
+    .home-btn { justify-self: start; }
+    .bar-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; min-width: 0; }
+    .bar-title span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-icon { width: 24px; height: 24px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex: none; }
+    .bar-actions { justify-self: end; display: flex; gap: 2px; }
+    @media (max-width: 420px) { .home-btn span { display: none; } }
+
+    .frames { position: relative; flex: 1; background: #fff; }
+    .frame { position: absolute; inset: 0; display: none; }
+    .frame.active { display: block; }
+    .frame iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+
+    .splash {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; background: var(--night); color: #fff; text-align: center; padding: 24px;
+      transition: opacity .2s ease;
+    }
+    .splash.gone { opacity: 0; pointer-events: none; }
+    .splash .icon { width: 84px; height: 84px; border-radius: 20px; font-size: 40px; }
+    .splash-label { font-size: 16px; font-weight: 600; }
+    .splash-status { font-size: 13px; opacity: 0.6; min-height: 1.4em; max-width: 320px; line-height: 1.45; }
+    .splash-actions { display: flex; gap: 10px; }
+    .splash-actions button { font-size: 14px; font-weight: 600; padding: 9px 14px; border-radius: 10px; background: rgba(255,255,255,0.12); }
+    .splash-actions button.primary { background: #fff; color: var(--night); }
+    .spinner {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,0.18); border-top-color: rgba(255,255,255,0.85);
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 30;
+      transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+      max-width: min(420px, calc(100vw - 32px));
+      background: rgba(20,26,46,0.96); border: 1px solid var(--glass-line); border-radius: 12px;
+      padding: 11px 14px; font-size: 13.5px; line-height: 1.4; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+    .toast a { color: inherit; text-decoration: underline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .home, .stage, .toast { transition: none; }
+      .stage { transform: none; }
+      body.app-open .home { transform: none; }
+      .spinner { animation-duration: 2s; }
+    }
+
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <div class="top">
-    <div class="clock" id="clock">--:--</div>
-    <div class="date" id="date">—</div>
-    <div class="greeting" id="greeting">Internal Apps</div>
+  <main class="home" id="home">
+    <div class="top">
+      <div class="brand">Offload Crew</div>
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date">—</div>
+      <div class="greeting" id="greeting">Internal tools</div>
+    </div>
+
+    <nav class="grid hidden" id="grid" aria-label="Apps"></nav>
+
+    <form class="card hidden" id="login" autocomplete="on" novalidate>
+      <h2>Sign in to Offload Crew</h2>
+      <p>One sign-in opens every tool. Use your Quote Builder email and password.</p>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn" id="submit" type="submit">Continue</button>
+      <div class="error" id="error" role="alert"></div>
+    </form>
+
+    <div class="notice" id="notice">Loading…</div>
+
+    <div class="footer">
+      <span>Offload Crew Launcher · internal use only</span>
+      <span class="who hidden" id="who"></span>
+    </div>
+  </main>
+
+  <section class="stage" id="stage" aria-hidden="true">
+    <header class="appbar">
+      <button class="bar-btn home-btn" id="home-btn" type="button" aria-label="Home"><i class="ti ti-chevron-left"></i><span>Home</span></button>
+      <div class="bar-title"><span class="bar-icon" id="bar-icon"></span><span id="bar-label"></span></div>
+      <div class="bar-actions">
+        <button class="bar-btn icon-only" id="reload-btn" type="button" aria-label="Reload app" title="Reload app"><i class="ti ti-refresh"></i></button>
+        <button class="bar-btn icon-only" id="newtab-btn" type="button" aria-label="Open in a new tab" title="Open in a new tab"><i class="ti ti-external-link"></i></button>
+        <button class="bar-btn icon-only" id="close-btn" type="button" aria-label="Close app" title="Close app"><i class="ti ti-x"></i></button>
+      </div>
+    </header>
+    <div class="frames" id="frames"></div>
+  </section>
+
+  <div class="sheet hidden" id="pw-sheet" role="dialog" aria-modal="true" aria-labelledby="pw-title">
+    <form class="card" id="pw-form" novalidate>
+      <h2 id="pw-title">Change password</h2>
+      <p>This is the password you use for the launcher and the Quote Builder.</p>
+      <div class="field">
+        <label for="pw-new">New password</label>
+        <input id="pw-new" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+      <div class="field">
+        <label for="pw-again">New password again</label>
+        <input id="pw-again" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+      <button class="btn" id="pw-save" type="submit">Save password</button>
+      <button class="btn ghost" id="pw-cancel" type="button">Cancel</button>
+      <div class="error" id="pw-error" role="alert"></div>
+    </form>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <div class="footer">Offload · internal use only</div>
-
+  <script src="auth.js"></script>
   <script>
-    /* ════════════════════════════════════════════════════
-       EDIT YOUR APPS HERE
-       - url:   where the icon links (full https URL)
-       - label: text under the icon
-       - icon:  any Tabler icon name → https://tabler.io/icons
-       - color: CSS background for the tile (gradient or solid)
-       - soon:  optional, set true to show a "SOON" badge + disable
-       ════════════════════════════════════════════════════ */
-    const APPS = [
-      {
-        label: 'Quote Builder',
-        url: 'https://rqr-quote-builder.vercel.app',
-        icon: 'ti-file-invoice',
-        color: 'linear-gradient(160deg, #e8651a, #b23b1a)',
-      },
-      {
-        label: 'QB Staging',
-        url: 'https://rqr-quote-builder-git-staging-cumbretalent-5400s-projects.vercel.app',
-        icon: 'ti-flask',
-        color: 'linear-gradient(160deg, #d4a017, #8a6d0f)',
-        badge: 'TEST',
-      },
-      {
-        label: 'Admin Console',
-        url: 'https://tradezip-admin.vercel.app',
-        icon: 'ti-shield-lock',
-        color: 'linear-gradient(160deg, #2dd4bf, #0f766e)',
-      },
-      {
-        label: 'Admin Staging',
-        url: 'https://tradezip-admin-git-staging-cumbretalent-5400s-projects.vercel.app',
-        icon: 'ti-shield-lock',
-        color: 'linear-gradient(160deg, #d4a017, #8a6d0f)',
-        badge: 'TEST',
-      },
-      {
-        label: 'Crew Training',
-        url: 'https://offload-crew-training.vercel.app/',
-        icon: 'ti-user-plus',
-        color: 'linear-gradient(160deg, #3a9d5d, #1a7a3c)',
-      },
-      {
-        label: 'Invoice Chaser',
-        url: 'https://invoice-chaser-silk.vercel.app/',
-        icon: 'ti-cash-banknote',
-        color: 'linear-gradient(160deg, #60a5fa, #2563eb)',
-      },
-      {
-        label: 'Workflows',
-        url: 'workflow.html',
-        icon: 'ti-route',
-        color: 'linear-gradient(160deg, #9b6fd4, #5b3aa8)',
-      },
-      // Add more apps by copying a block above ↑
-    ];
+    const $ = id => document.getElementById(id)
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+    const HOME_TITLE = 'Offload Crew Launcher'
 
-    // ── Render the grid ──
-    const grid = document.getElementById('grid');
-    grid.innerHTML = APPS.map(a => {
-      const isPlaceholder = a.url.includes('YOUR-') || a.soon;
-      const href = isPlaceholder ? 'javascript:void(0)' : a.url;
-      const target = isPlaceholder ? '' : 'target="_blank" rel="noopener"';
-      const badgeHtml = isPlaceholder
-        ? '<span class="badge-soon">SET URL</span>'
-        : (a.badge ? `<span class="badge-test">${a.badge}</span>` : '');
-      return `
-        <a class="app" href="${href}" ${target}>
-          <div class="icon" style="background:${a.color}">
-            <i class="ti ${a.icon}"></i>
-            ${badgeHtml}
-          </div>
-          <div class="label">${a.label}</div>
-        </a>`;
-    }).join('');
+    let tiles = []                 // what /api/apps returned for this person
+    const running = new Map()      // key → { tile, el, iframe, splash, home }
+    let current = null             // key of the app on screen, or null
+
+    // ── Views on the home screen ──
+    function show(which) {
+      ['grid', 'login', 'notice'].forEach(id => $(id).classList.toggle('hidden', id !== which))
+    }
+    function notice(message, linkText, onClick) {
+      $('notice').innerHTML = `<p>${esc(message)}</p>${linkText ? `<a id="notice-link">${esc(linkText)}</a>` : ''}`
+      if (linkText) $('notice-link').onclick = onClick
+      show('notice')
+    }
+    let toastTimer = null
+    function toast(html) {
+      $('toast').innerHTML = html
+      $('toast').classList.add('show')
+      clearTimeout(toastTimer)
+      toastTimer = setTimeout(() => $('toast').classList.remove('show'), 6000)
+    }
+
+    // ── Same-site check ──
+    // Apps open inside the launcher only when they share its site (for example
+    // quotes.offloadcrew.com inside apps.offloadcrew.com). Across sites the
+    // browser would block their logins inside the frame, so they get a tab.
+    function siteOf(host) {
+      if (host === 'localhost' || /^[\d.:]+$/.test(host)) return host
+      const parts = host.split('.')
+      if (host.endsWith('.vercel.app')) return parts.slice(-3).join('.')
+      return parts.slice(-2).join('.')
+    }
+    function canEmbed(tile) {
+      if (!tile.embed) return false
+      try { return siteOf(new URL(tile.url, location.href).hostname) === siteOf(location.hostname) }
+      catch (e) { return false }
+    }
+
+    // ── Grid ──
+    function iconHtml(t, cls) {
+      return `<div class="icon ${cls || ''}" style="background:${esc(t.color)}"><i class="ti ${esc(t.icon)}"></i>${t.badge && !cls ? `<span class="badge-test">${esc(t.badge)}</span>` : ''}</div>`
+    }
+    function renderGrid({ apps, email, role }) {
+      tiles = apps
+      $('grid').innerHTML = apps.map(t => `
+        <button class="app${running.has(t.key) ? ' running' : ''}" type="button" data-key="${esc(t.key)}"
+          aria-label="Open ${esc(t.label)}${canEmbed(t) ? '' : ' in a new tab'}">
+          ${iconHtml(t)}
+          <div class="label">${esc(t.label)}</div>
+        </button>`).join('')
+      $('grid').querySelectorAll('.app').forEach(btn => {
+        btn.onclick = () => openTile(tiles.find(t => t.key === btn.dataset.key), btn)
+      })
+      const roleLabel = { superadmin: 'Super admin', admin: 'Admin', va: 'Assistant' }[role] || role
+      $('who').innerHTML = `${esc(email)} · ${esc(roleLabel)} · <a id="changepw">Change password</a> · <a id="signout">Sign out</a>`
+      $('who').classList.remove('hidden')
+      $('signout').onclick = signOut
+      $('changepw').onclick = openPasswordForm
+      show('grid')
+    }
+    function markRunning() {
+      $('grid').querySelectorAll('.app').forEach(btn => btn.classList.toggle('running', running.has(btn.dataset.key)))
+    }
+
+    // ── Navigation: #/quotes shows that app, no hash shows home ──
+    function keyFromHash() { const m = /^#\/([\w-]+)$/.exec(location.hash); return m ? m[1] : null }
+    function go(key) {
+      if (keyFromHash() === key) return route()
+      history.pushState(null, '', key ? `#/${key}` : location.pathname + location.search)
+      route()
+    }
+    window.addEventListener('popstate', route)
+    window.addEventListener('hashchange', route)
+
+    function route() {
+      const key = keyFromHash()
+      const tile = key && tiles.find(t => t.key === key)
+      if (!tile || !canEmbed(tile)) return showHome()
+      showApp(tile)
+    }
+
+    function showHome() {
+      if (keyFromHash()) history.replaceState(null, '', location.pathname + location.search)
+      current = null
+      document.body.classList.remove('app-open')
+      $('stage').setAttribute('aria-hidden', 'true')
+      document.title = HOME_TITLE
+      running.forEach(r => r.el.classList.remove('active'))
+      markRunning()
+    }
+
+    function showApp(tile) {
+      let rec = running.get(tile.key)
+      if (!rec) rec = startApp(tile)
+      running.forEach(r => r.el.classList.toggle('active', r === rec))
+      current = tile.key
+      $('bar-icon').style.background = tile.color
+      $('bar-icon').innerHTML = `<i class="ti ${esc(tile.icon)}"></i>`
+      $('bar-label').textContent = tile.label
+      document.title = `${tile.label} · Offload Crew`
+      $('stage').setAttribute('aria-hidden', 'false')
+      document.body.classList.add('app-open')
+      markRunning()
+    }
+
+    // ── Running an app inside the launcher ──
+    function startApp(tile) {
+      const el = document.createElement('div')
+      el.className = 'frame'
+      el.innerHTML = `
+        <div class="splash">
+          ${iconHtml(tile, 'big')}
+          <div class="splash-label">${esc(tile.label)}</div>
+          <div class="spinner"></div>
+          <div class="splash-status">Signing you in…</div>
+          <div class="splash-actions hidden"></div>
+        </div>`
+      $('frames').appendChild(el)
+      const rec = { tile, el, iframe: null, splash: el.querySelector('.splash'), home: null }
+      running.set(tile.key, rec)
+      launchInto(rec)
+      return rec
+    }
+
+    function splashState(rec, { status, spinning, actions }) {
+      rec.splash.classList.remove('gone')
+      rec.splash.querySelector('.splash-status').textContent = status
+      rec.splash.querySelector('.spinner').classList.toggle('hidden', !spinning)
+      const box = rec.splash.querySelector('.splash-actions')
+      box.innerHTML = ''
+      box.classList.toggle('hidden', !actions || !actions.length)
+      ;(actions || []).forEach(a => {
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.textContent = a.label
+        if (a.primary) b.className = 'primary'
+        b.onclick = a.run
+        box.appendChild(b)
+      })
+    }
+
+    async function launchInto(rec) {
+      splashState(rec, { status: 'Signing you in…', spinning: true })
+      let res
+      try { res = await LauncherAuth.launch(rec.tile.key) }
+      catch (e) { res = { status: 0, data: null } }
+
+      if (res.status === 401) { closeApp(rec.tile.key); return boot() }
+      if (res.status !== 200 || !res.data || !res.data.url) {
+        const msg = (res.data && res.data.error) || 'Could not open this app. Check your connection and try again.'
+        return splashState(rec, { status: msg, spinning: false, actions: [{ label: 'Try again', primary: true, run: () => launchInto(rec) }] })
+      }
+
+      const target = new URL(res.data.url, location.href)
+      rec.home = target.origin === location.origin ? target.pathname : target.origin + '/'
+      if (rec.iframe) rec.iframe.remove()
+      const f = document.createElement('iframe')
+      f.title = rec.tile.label
+      f.allow = 'camera; microphone; geolocation; clipboard-read; clipboard-write; fullscreen; web-share; display-capture; autoplay'
+      f.referrerPolicy = 'strict-origin'
+      f.addEventListener('load', () => rec.splash.classList.add('gone'))
+      f.src = target.toString()
+      rec.iframe = f
+      rec.el.insertBefore(f, rec.splash)
+      splashState(rec, { status: res.data.sso ? 'Signing you in…' : 'Opening…', spinning: true })
+    }
+
+    function closeApp(key) {
+      const rec = running.get(key)
+      if (!rec) return
+      rec.el.remove()
+      running.delete(key)
+      if (current === key) go(null)
+      markRunning()
+    }
+
+    // ── Opening in a new tab (other sites, staging, or on request) ──
+    // The tab is opened straight away, while the click still counts as a click,
+    // then pointed at the signed-in address once the launcher has it.
+    async function openExternal(tile) {
+      const w = window.open('about:blank', '_blank')
+      if (w) {
+        try {
+          w.opener = null
+          w.document.title = `Opening ${tile.label}…`
+          w.document.body.style.cssText = 'margin:0;display:grid;place-items:center;height:100vh;background:#0b1020;color:#fff;font:15px -apple-system,system-ui,sans-serif'
+          w.document.body.textContent = `Opening ${tile.label}…`
+        } catch (e) {}
+      }
+      let res
+      try { res = await LauncherAuth.launch(tile.key) } catch (e) { res = { status: 0 } }
+      if (res.status === 401) { if (w) w.close(); return boot() }
+      if (res.status !== 200 || !res.data || !res.data.url) {
+        if (w) w.close()
+        return toast(esc((res.data && res.data.error) || `Could not open ${tile.label}. Try again.`))
+      }
+      if (w && !w.closed) w.location.replace(res.data.url)
+      else toast(`Your browser blocked the new tab. <a href="${esc(res.data.url)}" target="_blank" rel="noopener">Open ${esc(tile.label)}</a>`)
+    }
+
+    function openTile(tile, btn) {
+      if (!tile) return
+      if (!canEmbed(tile)) return openExternal(tile)
+      if (btn) {
+        const r = btn.querySelector('.icon').getBoundingClientRect()
+        $('stage').style.transformOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`
+      }
+      go(tile.key)
+    }
+
+    // ── App bar ──
+    $('home-btn').onclick = () => go(null)
+    $('close-btn').onclick = () => current && closeApp(current)
+    $('reload-btn').onclick = () => {
+      const rec = current && running.get(current)
+      if (!rec) return
+      // The app keeps its own session, so reloading its front page is enough;
+      // if that ever fails, the launch is redone from scratch.
+      if (rec.iframe && rec.home) { splashState(rec, { status: 'Reloading…', spinning: true }); rec.iframe.src = rec.home }
+      else launchInto(rec)
+    }
+    $('newtab-btn').onclick = () => {
+      const rec = current && running.get(current)
+      if (!rec) return
+      if (rec.home) window.open(rec.home, '_blank', 'noopener')
+      else openExternal(rec.tile)
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && current && $('pw-sheet').classList.contains('hidden')) go(null) })
+
+    // ── Change password ──
+    function openPasswordForm() {
+      $('pw-error').textContent = ''
+      $('pw-new').value = ''; $('pw-again').value = ''
+      $('pw-sheet').classList.remove('hidden')
+      $('pw-new').focus()
+    }
+    function closePasswordForm() { $('pw-sheet').classList.add('hidden') }
+    $('pw-cancel').onclick = closePasswordForm
+    $('pw-sheet').addEventListener('click', e => { if (e.target === $('pw-sheet')) closePasswordForm() })
+    $('pw-sheet').addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closePasswordForm() } })
+    $('pw-form').addEventListener('submit', async e => {
+      e.preventDefault()
+      const a = $('pw-new').value, b = $('pw-again').value
+      if (a.length < 8) { $('pw-error').textContent = 'Use at least 8 characters.'; return }
+      if (a !== b) { $('pw-error').textContent = 'The two passwords don’t match.'; return }
+      $('pw-save').disabled = true
+      try {
+        await LauncherAuth.changePassword(a)
+        closePasswordForm()
+        toast('Password changed. Use it next time you sign in.')
+      } catch (err) {
+        $('pw-error').textContent = err.message || 'Could not change your password.'
+      } finally {
+        $('pw-save').disabled = false
+      }
+    })
+
+    // ── Session ──
+    async function signOut() {
+      $('who').classList.add('hidden')
+      ;[...running.keys()].forEach(closeApp)
+      tiles = []
+      showHome()
+      await LauncherAuth.signOut()
+      show('login')
+      $('email').focus()
+    }
+
+    // 401 → sign-in form, 403 → not allowed, 200 → grid (and any app in the URL)
+    async function boot() {
+      if (!tiles.length) notice('Loading…')
+      let res
+      try { res = await LauncherAuth.apps() }
+      catch (e) { return notice(e.message || 'Could not reach the launcher.', 'Try again', boot) }
+
+      if (res.status === 401) {
+        ;[...running.keys()].forEach(closeApp)
+        showHome(); show('login'); $('email').focus(); return
+      }
+      if (res.status === 403) {
+        return notice((res.data && res.data.error) || 'This account is not allowed here.', 'Use a different account', async () => {
+          await LauncherAuth.signOut(); show('login'); $('email').value = ''; $('email').focus()
+        })
+      }
+      if (res.status !== 200 || !res.data) {
+        return notice((res.data && res.data.error) || 'Something went wrong loading your apps.', 'Try again', boot)
+      }
+
+      // Arrived via a guarded page (workflow.html sends ?next=/workflow.html).
+      const next = new URLSearchParams(location.search).get('next')
+      if (next && /^\/[^/\\]/.test(next)) { location.replace(next); return }
+
+      renderGrid(res.data)
+      route()
+    }
+
+    $('login').addEventListener('submit', async e => {
+      e.preventDefault()
+      $('error').textContent = ''
+      const email = $('email').value.trim()
+      const password = $('password').value
+      if (!email || !password) { $('error').textContent = 'Enter your email and password.'; return }
+      $('submit').disabled = true
+      try {
+        await LauncherAuth.signIn(email, password)
+        $('password').value = ''
+        await boot()
+      } catch (err) {
+        $('error').textContent = err.message || 'Sign-in failed.'
+      } finally {
+        $('submit').disabled = false
+      }
+    })
 
     // ── Live clock ──
     function tick() {
-      const now = new Date();
-      let h = now.getHours();
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12 || 12;
-      document.getElementById('clock').textContent = `${h}:${m}`;
-      document.getElementById('date').textContent =
-        now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-      const hr = now.getHours();
-      document.getElementById('greeting').textContent =
-        hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+      const now = new Date()
+      let h = now.getHours()
+      const m = String(now.getMinutes()).padStart(2, '0')
+      h = h % 12 || 12
+      $('clock').textContent = `${h}:${m}`
+      $('date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      const hr = now.getHours()
+      $('greeting').textContent = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening'
     }
-    tick();
-    setInterval(tick, 1000);
+    tick()
+    setInterval(tick, 1000)
+
+    boot()
   </script>
 </body>
 </html>
