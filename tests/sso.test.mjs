@@ -85,7 +85,7 @@ test('launch: VA gets a signed address for an app they may open', async () => {
   assert.equal(res.statusCode, 200)
   assert.equal(res.body.sso, true)
   const u = new URL(res.body.url)
-  assert.equal(u.origin + u.pathname, 'https://rqr-quote-builder.vercel.app/api/launch')
+  assert.equal(u.origin + u.pathname, 'https://offload-quote-builder.vercel.app/api/launch')
   const v = verifyTicket(u.searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'quotes', now: NOW })
   assert.equal(v.ok, true)
   assert.equal(v.claims.role, 'va')

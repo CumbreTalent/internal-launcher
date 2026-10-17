@@ -112,7 +112,7 @@ launcher works and each app simply asks for its own login, as before.
 
 | App | Add |
 |---|---|
-| rqr-quote-builder | `LAUNCHER_PUBLIC_KEY` |
+| offload-quote-builder | `LAUNCHER_PUBLIC_KEY` |
 | tradezip-admin | `LAUNCHER_PUBLIC_KEY` |
 | invoice-chaser | `LAUNCHER_PUBLIC_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from that app's Supabase project (Settings → API) |
 | offload-crew-training | `LAUNCHER_PUBLIC_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from that app's Supabase project |
@@ -134,7 +134,7 @@ Open `api/_apps.js`. Each tile is one object:
   label: 'Quote Builder',
   icon: 'ti-file-invoice',                        // any name from tabler.io/icons
   color: 'linear-gradient(160deg, #e8651a, #b23b1a)',
-  legacy: 'https://rqr-quote-builder.vercel.app', // where it lives today
+  legacy: 'https://offload-quote-builder.vercel.app', // where it lives today
   custom: 'https://quotes.offloadcrew.com',       // where it lives after the domain move
   sso: true,                                      // the app has /api/launch
   embed: true,                                    // may open inside the launcher
@@ -157,8 +157,8 @@ Namecheap.
 | Subdomain | Vercel project | Git branch |
 |---|---|---|
 | `apps.offloadcrew.com` | this launcher | main |
-| `quotes.offloadcrew.com` | rqr-quote-builder | main |
-| `quotes-staging.offloadcrew.com` | rqr-quote-builder | staging |
+| `quotes.offloadcrew.com` | offload-quote-builder | main |
+| `quotes-staging.offloadcrew.com` | offload-quote-builder | staging |
 | `console.offloadcrew.com` | tradezip-admin | main |
 | `console-staging.offloadcrew.com` | tradezip-admin | staging |
 | `training.offloadcrew.com` | offload-crew-training | main |
@@ -171,7 +171,7 @@ in `src/env.js`, or production shows the STAGING banner.
 
 ## Lock staging
 
-Hiding a tile is not security. In Vercel, for `rqr-quote-builder`, turn on
+Hiding a tile is not security. In Vercel, for `offload-quote-builder`, turn on
 **Settings → Deployment Protection → Vercel Authentication** (Standard
 Protection). `tradezip-admin` already has it. Don't add the VA to the Vercel
 team. The Admin Console's own password still works for anyone who has it, so
