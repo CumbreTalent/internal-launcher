@@ -19,10 +19,9 @@ on the People screen. Anyone else who signs in is refused, so a Tradezip
 customer account cannot see internal tiles even though it lives in the same
 Supabase.
 
-The live **Admin Console** tile is hidden for now, for everyone: that
-deployment has no database settings in Vercel, so it cannot load data. Use
-Admin Staging. To bring it back, configure tradezip-admin's Production env,
-then delete the `hidden: true` line on its tile in `api/_apps.js`.
+The live **Admin Console** tile opens tradezip-admin's production deployment,
+which needs that project's Production env configured (see its README). A tile
+can be taken out of circulation with `hidden: true` in `api/_apps.js`.
 
 The tile list lives on the server (`api/_apps.js`) and reaches the browser
 already filtered by role: an assistant's browser never receives the staging,

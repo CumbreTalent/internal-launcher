@@ -113,10 +113,12 @@ test('launch: People is a launcher page for the super admin only', async () => {
   assert.equal((await callLaunch(lreq('tok:va@example.com', { app: 'people' }))).statusCode, 404)
 })
 
-test('launch: a hidden app cannot be launched, even by an admin', async () => {
+test('launch: the live Admin Console opens for admins, with an admin ticket', async () => {
   const res = await callLaunch(lreq('tok:owner@offloadcrew.com', { app: 'console' }))
-  assert.equal(res.statusCode, 404)
-  assert.equal(res.body.url, undefined)
+  assert.equal(res.statusCode, 200)
+  const u = new URL(res.body.url)
+  assert.equal(u.origin, 'https://tradezip-admin.vercel.app')
+  assert.equal(verifyTicket(u.searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'console', now: NOW }).claims.role, 'admin')
 })
 
 test('launch: VA asking for an admin app gets the same 404 as an unknown app', async () => {
