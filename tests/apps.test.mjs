@@ -1,12 +1,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { APPS, roleFor, tilesFor, tileUrl, appFor, ticketRole, isSuperadminEmail } from '../api/_apps.js'
+import { APPS, roleFor, tilesFor, tileUrl, appFor, ticketRole, isSuperadminEmail, allowed } from '../api/_apps.js'
 import { verifyUser, bearerToken } from '../api/_auth.js'
 import handler from '../api/apps.js'
 import { fakeFetch, fakeRes, ENV } from './_helpers.mjs'
 
 const VA_LABELS = ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'Workflows']
-const ADMIN_LABELS = ['Quote Builder', 'QB Staging', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'Workflows']
+const ADMIN_LABELS = ['Quote Builder', 'QB Staging', 'Admin Console', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'Workflows']
 const SUPER_LABELS = [...ADMIN_LABELS, 'People']
 
 const req = (token, method = 'GET') => ({ method, headers: token ? { authorization: `Bearer ${token}` } : {} })
@@ -67,12 +67,14 @@ test('People is super-admin only, in tiles and in appFor', () => {
   assert.equal(appFor('people', 'superadmin').url, '/people.html')
 })
 
-test('hidden tiles reach nobody: the live Admin Console is hidden from everyone', () => {
-  assert.equal(APPS.find(a => a.key === 'console').hidden, true)
-  for (const role of ['superadmin', 'admin', 'va']) {
-    assert.ok(!tilesFor(role, ENV).some(t => t.key === 'console'), role)
-    assert.equal(appFor('console', role), null, role)
-  }
+test('hidden tiles reach nobody; the live Admin Console is no longer hidden', () => {
+  const ghost = { key: 'ghost', label: 'Ghost', legacy: 'https://ghost.example', custom: 'https://ghost.offloadcrew.com', hidden: true }
+  for (const role of ['superadmin', 'admin', 'va']) assert.equal(allowed(ghost, role), false, role)
+  assert.equal(APPS.find(a => a.key === 'console').hidden, undefined)
+  assert.ok(tilesFor('admin', ENV).some(t => t.key === 'console'))
+  assert.ok(tilesFor('superadmin', ENV).some(t => t.key === 'console'))
+  assert.equal(appFor('console', 'va'), null)
+  assert.equal(appFor('console', 'admin').key, 'console')
 })
 
 test('tilesFor: only the browser-safe fields are returned', () => {
