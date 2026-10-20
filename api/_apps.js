@@ -98,6 +98,38 @@ export const APPS = [
     embed: true,
   },
   {
+    // Admins and assistants both use the CRM. It is not adminOnly: the CRM
+    // itself shows an assistant only the clients they are assigned to, and
+    // never contract values (its database rules, not this tile, enforce that).
+    key: 'crm',
+    label: 'CRM',
+    icon: 'ti-address-book',
+    color: 'linear-gradient(160deg, #f472b6, #be185d)',
+    // Hidden until the CRM is deployed (repo offload-crm). Delete this line
+    // to bring the tile back.
+    hidden: true,
+    legacy: 'https://offload-crm.vercel.app',
+    custom: 'https://crm.offloadcrew.com',
+    sso: true,
+    embed: true,
+  },
+  {
+    key: 'crm-staging',
+    label: 'CRM Staging',
+    icon: 'ti-address-book',
+    color: 'linear-gradient(160deg, #d4a017, #8a6d0f)',
+    badge: 'TEST',
+    adminOnly: true,
+    // Hidden until the CRM's staging build is deployed. Delete this line to
+    // bring the tile back.
+    hidden: true,
+    legacy: 'https://offload-crm-git-staging-cumbretalent-5400s-projects.vercel.app',
+    custom: 'https://crm-staging.offloadcrew.com',
+    previewHosts: [/^offload-crm-[a-z0-9-]+-cumbretalent-5400s-projects\.vercel\.app$/, /^crm-staging\.offloadcrew\.com$/],
+    sso: true,
+    embed: false,
+  },
+  {
     key: 'workflows',
     label: 'Workflows',
     icon: 'ti-route',
