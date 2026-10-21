@@ -107,7 +107,7 @@ This writes `.launcher-keys.txt`, which git ignores, with two values.
 | `SUPABASE_ANON_KEY` | the matching anon key (`VITE_SUPABASE_ANON_KEY` there) |
 | `SUPABASE_SERVICE_ROLE_KEY` | the same project's service key, marked Sensitive. Used only by the People screen, behind the super-admin check, to create logins and set roles |
 | `LAUNCHER_SUPERADMIN_EMAILS` | the super admin's email (comma-separated if ever more than one) |
-| `LAUNCHER_USE_CUSTOM_DOMAINS` | `0` until the offloadcrew.com addresses work, then `1` |
+| `LAUNCHER_USE_CUSTOM_DOMAINS` | `0` until the offloadcrew.com addresses work, then `1`. To move apps one at a time, list the keys whose address already works, e.g. `crm` or `crm,quotes` |
 | `LAUNCHER_SIGNING_KEY` | from `.launcher-keys.txt`. Add this **last**, once every app below is deployed |
 
 Tick Production and Preview for each. Until `LAUNCHER_SIGNING_KEY` is set, the
@@ -174,7 +174,9 @@ Namecheap.
 | `crm.offloadcrew.com` | offload-crm | main |
 | `crm-staging.offloadcrew.com` | offload-crm | staging |
 
-Then set `LAUNCHER_USE_CUSTOM_DOMAINS=1` here and redeploy. Every app allows
+Then set `LAUNCHER_USE_CUSTOM_DOMAINS=1` here and redeploy. (Until every address
+works, list just the ready ones instead, e.g. `LAUNCHER_USE_CUSTOM_DOMAINS=crm`:
+those tiles move and the rest stay on vercel.app.) Every app allows
 itself to be shown inside `https://apps.offloadcrew.com` and nowhere else.
 Also add `quotes.offloadcrew.com` to the Quote Builder's production host list
 in `src/env.js`, or production shows the STAGING banner.
