@@ -24,11 +24,10 @@ deployment has no database settings in Vercel, so it cannot load data. Use
 Admin Staging. To bring it back, configure tradezip-admin's Production env,
 then delete the `hidden: true` line on its tile in `api/_apps.js`.
 
-The **CRM** and **CRM Staging** tiles are hidden too, until the CRM (repo
-offload-crm) is deployed with the settings below. Then delete the
-`hidden: true` line on each. Assistants get the CRM tile, not CRM Staging;
-inside the CRM they see only the clients they are assigned to, and never
-contract values.
+The **CRM** tile (repo offload-crm, live at offload-crm.vercel.app) is for
+admins and assistants; inside the CRM, assistants see only the clients they
+are assigned to, and never contract values. **CRM Staging** stays hidden until
+the CRM has a staging copy; then delete the `hidden: true` line on its tile.
 
 The tile list lives on the server (`api/_apps.js`) and reaches the browser
 already filtered by role: an assistant's browser never receives the staging,

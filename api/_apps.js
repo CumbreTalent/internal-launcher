@@ -105,9 +105,6 @@ export const APPS = [
     label: 'CRM',
     icon: 'ti-address-book',
     color: 'linear-gradient(160deg, #f472b6, #be185d)',
-    // Hidden until the CRM is deployed (repo offload-crm). Delete this line
-    // to bring the tile back.
-    hidden: true,
     legacy: 'https://offload-crm.vercel.app',
     custom: 'https://crm.offloadcrew.com',
     sso: true,
@@ -120,8 +117,8 @@ export const APPS = [
     color: 'linear-gradient(160deg, #d4a017, #8a6d0f)',
     badge: 'TEST',
     adminOnly: true,
-    // Hidden until the CRM's staging build is deployed. Delete this line to
-    // bring the tile back.
+    // Hidden until the CRM has a staging copy (its own Supabase project and the
+    // Preview settings in the CRM's README). Delete this line to bring it back.
     hidden: true,
     legacy: 'https://offload-crm-git-staging-cumbretalent-5400s-projects.vercel.app',
     custom: 'https://crm-staging.offloadcrew.com',

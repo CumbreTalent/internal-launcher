@@ -5,8 +5,8 @@ import { verifyUser, bearerToken } from '../api/_auth.js'
 import handler from '../api/apps.js'
 import { fakeFetch, fakeRes, ENV } from './_helpers.mjs'
 
-const VA_LABELS = ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'Workflows']
-const ADMIN_LABELS = ['Quote Builder', 'QB Staging', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'Workflows']
+const VA_LABELS = ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'CRM', 'Workflows']
+const ADMIN_LABELS = ['Quote Builder', 'QB Staging', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'CRM', 'Workflows']
 const SUPER_LABELS = [...ADMIN_LABELS, 'People']
 
 const req = (token, method = 'GET') => ({ method, headers: token ? { authorization: `Bearer ${token}` } : {} })
@@ -75,14 +75,13 @@ test('hidden tiles reach nobody: the live Admin Console is hidden from everyone'
   }
 })
 
-test('the CRM tiles stay hidden, and cannot be launched, until the CRM is deployed', () => {
-  for (const key of ['crm', 'crm-staging']) {
-    assert.equal(APPS.find(a => a.key === key).hidden, true, key)
-    for (const role of ['superadmin', 'admin', 'va']) {
-      assert.ok(!tilesFor(role, ENV).some(t => t.key === key), `${key} ${role}`)
-      assert.equal(appFor(key, role), null, `${key} ${role}`)
-    }
+test('the CRM is open to every role; CRM Staging stays hidden until it exists', () => {
+  for (const role of ['superadmin', 'admin', 'va']) {
+    assert.equal(appFor('crm', role).key, 'crm', role)
+    assert.ok(!tilesFor(role, ENV).some(t => t.key === 'crm-staging'), role)
+    assert.equal(appFor('crm-staging', role), null, role)
   }
+  assert.equal(tilesFor('va', ENV).find(t => t.key === 'crm').url, 'https://offload-crm.vercel.app')
 })
 
 test('once unhidden: assistants get the CRM but never CRM Staging', () => {
