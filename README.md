@@ -8,8 +8,8 @@ you have opened keep running, so switching between them is instant.
 | Role | Sees |
 |---|---|
 | **Super admin** | every tile, plus **People**, where people are added and removed |
-| **Admin** | every tile except People: Quote Builder, QB Staging, Admin Staging, Crew Training, Invoice Chaser, Workflows |
-| **Assistant** | Quote Builder, Crew Training, Invoice Chaser, Workflows |
+| **Admin** | every tile except People: Quote Builder, QB Staging, Admin Staging, Crew Training, Invoice Chaser, CRM, CRM Staging, Workflows |
+| **Assistant** | Quote Builder, Crew Training, Invoice Chaser, CRM, Workflows |
 
 People sign in with their **Quote Builder** login. The super admin is set only
 by `LAUNCHER_SUPERADMIN_EMAILS` in Vercel, so no screen can create one.
@@ -23,6 +23,11 @@ The live **Admin Console** tile is hidden for now, for everyone: that
 deployment has no database settings in Vercel, so it cannot load data. Use
 Admin Staging. To bring it back, configure tradezip-admin's Production env,
 then delete the `hidden: true` line on its tile in `api/_apps.js`.
+
+The **CRM** tile (repo offload-crm, live at offload-crm.vercel.app) is for
+admins and assistants; inside the CRM, assistants see only the clients they
+are assigned to, and never contract values. **CRM Staging** stays hidden until
+the CRM has a staging copy; then delete the `hidden: true` line on its tile.
 
 The tile list lives on the server (`api/_apps.js`) and reaches the browser
 already filtered by role: an assistant's browser never receives the staging,
@@ -116,9 +121,12 @@ launcher works and each app simply asks for its own login, as before.
 | tradezip-admin | `LAUNCHER_PUBLIC_KEY` |
 | invoice-chaser | `LAUNCHER_PUBLIC_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from that app's Supabase project (Settings → API) |
 | offload-crew-training | `LAUNCHER_PUBLIC_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from that app's Supabase project |
+| offload-crm | `LAUNCHER_PUBLIC_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` from the CRM's own Supabase project. Preview also needs `LAUNCHER_GATE_SECRET` (CRM Staging is locked like the other staging sites). Its README lists the rest (Quo, the website form) |
 
 The Quote Builder and Admin Console already have their service keys. Invoice
-Chaser and Crew Training need theirs to create accounts on a first visit.
+Chaser, Crew Training and the CRM need theirs to create accounts on a first
+visit. The CRM also follows the launcher's role on every visit, so changing
+someone between Admin and Assistant on People changes their CRM access too.
 
 Check an app is ready by opening `<app address>/api/launch` directly. It
 should say "Open this app from the Offload Crew Launcher". If it says
@@ -163,6 +171,8 @@ Namecheap.
 | `console-staging.offloadcrew.com` | tradezip-admin | staging |
 | `training.offloadcrew.com` | offload-crew-training | main |
 | `invoices.offloadcrew.com` | invoice-chaser | main |
+| `crm.offloadcrew.com` | offload-crm | main |
+| `crm-staging.offloadcrew.com` | offload-crm | staging |
 
 Then set `LAUNCHER_USE_CUSTOM_DOMAINS=1` here and redeploy. Every app allows
 itself to be shown inside `https://apps.offloadcrew.com` and nowhere else.

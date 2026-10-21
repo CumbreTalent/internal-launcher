@@ -1,12 +1,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { APPS, roleFor, tilesFor, tileUrl, appFor, ticketRole, isSuperadminEmail } from '../api/_apps.js'
+import { APPS, roleFor, tilesFor, tileUrl, appFor, ticketRole, isSuperadminEmail, allowed, previewOrigin } from '../api/_apps.js'
 import { verifyUser, bearerToken } from '../api/_auth.js'
 import handler from '../api/apps.js'
 import { fakeFetch, fakeRes, ENV } from './_helpers.mjs'
 
-const VA_LABELS = ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'Workflows']
-const ADMIN_LABELS = ['Quote Builder', 'QB Staging', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'Workflows']
+const VA_LABELS = ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'CRM', 'Workflows']
+const ADMIN_LABELS = ['Quote Builder', 'QB Staging', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'CRM', 'Workflows']
 const SUPER_LABELS = [...ADMIN_LABELS, 'People']
 
 const req = (token, method = 'GET') => ({ method, headers: token ? { authorization: `Bearer ${token}` } : {} })
@@ -73,6 +73,42 @@ test('hidden tiles reach nobody: the live Admin Console is hidden from everyone'
     assert.ok(!tilesFor(role, ENV).some(t => t.key === 'console'), role)
     assert.equal(appFor('console', role), null, role)
   }
+})
+
+test('the CRM is open to every role; CRM Staging stays hidden until it exists', () => {
+  for (const role of ['superadmin', 'admin', 'va']) {
+    assert.equal(appFor('crm', role).key, 'crm', role)
+    assert.ok(!tilesFor(role, ENV).some(t => t.key === 'crm-staging'), role)
+    assert.equal(appFor('crm-staging', role), null, role)
+  }
+  assert.equal(tilesFor('va', ENV).find(t => t.key === 'crm').url, 'https://offload-crm.vercel.app')
+})
+
+test('once unhidden: assistants get the CRM but never CRM Staging', () => {
+  const shown = key => ({ ...APPS.find(a => a.key === key), hidden: false })
+  const crm = shown('crm')
+  const crmStaging = shown('crm-staging')
+  assert.equal(allowed(crm, 'va'), true)
+  assert.equal(allowed(crmStaging, 'va'), false)
+  for (const role of ['admin', 'superadmin']) {
+    assert.equal(allowed(crm, role), true, role)
+    assert.equal(allowed(crmStaging, role), true, role)
+  }
+  assert.equal(crm.embed, true)
+  assert.equal(crmStaging.embed, false)
+  assert.equal(tileUrl(crm, true), 'https://crm.offloadcrew.com')
+  assert.equal(tileUrl(crmStaging, true), 'https://crm-staging.offloadcrew.com')
+})
+
+test('CRM Staging only sends tickets to the CRM\'s own test addresses', () => {
+  const crmStaging = APPS.find(a => a.key === 'crm-staging')
+  assert.equal(previewOrigin(crmStaging, 'https://offload-crm-git-staging-cumbretalent-5400s-projects.vercel.app'), 'https://offload-crm-git-staging-cumbretalent-5400s-projects.vercel.app')
+  assert.equal(previewOrigin(crmStaging, 'https://offload-crm-abc123-cumbretalent-5400s-projects.vercel.app'), 'https://offload-crm-abc123-cumbretalent-5400s-projects.vercel.app')
+  assert.equal(previewOrigin(crmStaging, 'https://crm-staging.offloadcrew.com'), 'https://crm-staging.offloadcrew.com')
+  assert.equal(previewOrigin(crmStaging, 'https://crm.offloadcrew.com'), null, 'not the live CRM')
+  assert.equal(previewOrigin(crmStaging, 'https://offload-quote-builder-x-cumbretalent-5400s-projects.vercel.app'), null, 'not another app')
+  assert.equal(previewOrigin(crmStaging, 'https://offload-crm-x-cumbretalent-5400s-projects.vercel.app.evil.com'), null)
+  assert.equal(previewOrigin(crmStaging, 'http://crm-staging.offloadcrew.com'), null, 'https only')
 })
 
 test('tilesFor: only the browser-safe fields are returned', () => {
