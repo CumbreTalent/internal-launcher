@@ -100,6 +100,15 @@ test('launch: string bodies are parsed; custom domains are used when switched on
   assert.equal(verifyTicket(u.searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'console-staging', now: NOW }).claims.role, 'admin')
 })
 
+test('launch: a tile on the custom-domain list gets its ticket there; others stay on vercel.app', async () => {
+  const env = { ...LAUNCHER_ENV, LAUNCHER_USE_CUSTOM_DOMAINS: 'crm' }
+  const crm = new URL((await callLaunch(lreq('tok:owner@offloadcrew.com', { app: 'crm' }), env)).body.url)
+  assert.equal(crm.origin + crm.pathname, 'https://crm.offloadcrew.com/api/launch')
+  assert.equal(verifyTicket(crm.searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'crm', now: NOW }).ok, true)
+  const quotes = new URL((await callLaunch(lreq('tok:owner@offloadcrew.com', { app: 'quotes' }), env)).body.url)
+  assert.equal(quotes.origin, 'https://offload-quote-builder.vercel.app')
+})
+
 test('launch: the super admin opens apps as an admin, and tickets carry the name', async () => {
   const res = await callLaunch(lreq('tok:owner@offloadcrew.com', { app: 'invoices' }))
   const claims = verifyTicket(new URL(res.body.url).searchParams.get('ticket'), { publicKey: KEYS.publicKey, audience: 'invoices', now: NOW }).claims

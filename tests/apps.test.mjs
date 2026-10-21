@@ -145,6 +145,17 @@ test('custom-domain toggle switches every external tile, leaves launcher pages a
   assert.equal(tileUrl(APPS.find(a => a.key === 'workflows'), true), '/workflow.html')
 })
 
+test('a list of keys switches only those tiles to offloadcrew.com', () => {
+  const url = (env, label) => tilesFor('superadmin', { ...ENV, ...env }).find(t => t.label === label).url
+  const crmOnly = { LAUNCHER_USE_CUSTOM_DOMAINS: 'crm' }
+  assert.equal(url(crmOnly, 'CRM'), 'https://crm.offloadcrew.com')
+  for (const t of tilesFor('superadmin', { ...ENV, ...crmOnly })) {
+    if (t.label !== 'CRM' && /^https:/.test(t.url)) assert.match(t.url, /\.vercel\.app$/, t.label)
+  }
+  assert.equal(url({ LAUNCHER_USE_CUSTOM_DOMAINS: ' quotes , crm ' }, 'CRM'), 'https://crm.offloadcrew.com')
+  for (const off of ['0', '', 'yes', 'crm-staging']) assert.match(url({ LAUNCHER_USE_CUSTOM_DOMAINS: off }, 'CRM'), /\.vercel\.app$/, off)
+})
+
 test('every tile has a legacy and custom address, or a same-host url; keys are unique', () => {
   const keys = new Set()
   for (const a of APPS) {

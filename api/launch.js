@@ -15,7 +15,7 @@
 // launcher with the exact test build they tried to open, and the ticket goes
 // back to that build, never anywhere else.
 
-import { appFor, tileUrl, useCustomDomains, ticketRole, previewOrigin } from './_apps.js'
+import { appFor, tileUrl, useCustomDomain, ticketRole, previewOrigin } from './_apps.js'
 import { authenticate, bodyOf } from './_auth.js'
 import { signTicket } from './_ticket.js'
 
@@ -38,7 +38,7 @@ export default async function handler(req, res, deps = {}) {
   const app = appFor(body.app, who.role)
   if (!app) return res.status(404).json({ error: 'No such app.' })
 
-  let base = tileUrl(app, useCustomDomains(env))
+  let base = tileUrl(app, useCustomDomain(app, env))
   if (body.origin != null && body.origin !== '') {
     const origin = previewOrigin(app, body.origin)
     if (!origin) return res.status(400).json({ error: 'That address is not one of this app’s test sites.' })

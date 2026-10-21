@@ -8,7 +8,8 @@
 //   key     — stable id; also the app name inside launch tickets
 //   legacy  — where the app lives today (*.vercel.app)
 //   custom  — where it lives once the offloadcrew.com subdomains are added
-//             (flip LAUNCHER_USE_CUSTOM_DOMAINS=1 to switch every tile)
+//             (LAUNCHER_USE_CUSTOM_DOMAINS=1 switches every tile; a list of
+//             keys, e.g. crm,quotes, switches only those)
 //   url     — instead of legacy/custom, for pages inside the launcher itself
 //   sso     — the app has the /api/launch receiver, so opening it from the
 //             launcher signs the person in automatically
@@ -191,8 +192,13 @@ export const isAdminLevel = role => role === 'superadmin' || role === 'admin'
 // Apps only know admin and assistant: a super admin opens them as an admin.
 export const ticketRole = role => (isAdminLevel(role) ? 'admin' : role)
 
-export function useCustomDomains(env = process.env) {
-  return env.LAUNCHER_USE_CUSTOM_DOMAINS === '1'
+// Whether this tile opens at its offloadcrew.com address. "1" switches every
+// tile; a comma-separated list of keys ("crm,quotes") switches only those, so
+// each app can move as soon as its own address works. Anything else: none.
+export function useCustomDomain(app, env = process.env) {
+  const v = String(env.LAUNCHER_USE_CUSTOM_DOMAINS || '').trim()
+  if (v === '1') return true
+  return v.split(',').map(s => s.trim()).includes(app.key)
 }
 
 // A test address this app's staging tile may send a ticket to, or null.
@@ -227,13 +233,12 @@ export function appFor(key, role) {
 // browser needs to draw them.
 export function tilesFor(role, env = process.env) {
   if (!ROLES.includes(role)) return []
-  const custom = useCustomDomains(env)
   return APPS
     .filter(a => allowed(a, role))
     .map(a => ({
       key: a.key,
       label: a.label,
-      url: tileUrl(a, custom),
+      url: tileUrl(a, useCustomDomain(a, env)),
       icon: a.icon,
       color: a.color,
       badge: a.badge || null,
