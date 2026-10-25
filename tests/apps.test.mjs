@@ -1,12 +1,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { APPS, roleFor, tilesFor, tileUrl, appFor, ticketRole, isSuperadminEmail, allowed, previewOrigin } from '../api/_apps.js'
+import { APPS, roleFor, tilesFor, tileUrl, appFor, ticketRole, isSuperadminEmail, allowed, previewOrigin, appOrigins } from '../api/_apps.js'
 import { verifyUser, bearerToken } from '../api/_auth.js'
 import handler from '../api/apps.js'
 import { fakeFetch, fakeRes, ENV } from './_helpers.mjs'
 
-const VA_LABELS = ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'CRM', 'Workflows']
-const ADMIN_LABELS = ['Quote Builder', 'QB Staging', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'CRM', 'Workflows']
+const VA_LABELS = ['Quote Builder', 'Crew Training', 'Invoice Chaser', 'CRM', 'Knowledge']
+const ADMIN_LABELS = ['Quote Builder', 'QB Staging', 'Admin Staging', 'Crew Training', 'Invoice Chaser', 'CRM', 'Knowledge']
 const SUPER_LABELS = [...ADMIN_LABELS, 'People']
 
 const req = (token, method = 'GET') => ({ method, headers: token ? { authorization: `Bearer ${token}` } : {} })
@@ -56,8 +56,29 @@ test('tilesFor: assistants never receive staging, console or People addresses', 
   for (const t of tilesFor('va', ENV)) {
     assert.ok(!/staging|tradezip-admin|console|people/i.test(t.url), `VA tile leaks ${t.url}`)
     assert.ok(!/staging|console|people/.test(t.key), `VA tile leaks key ${t.key}`)
+    for (const o of t.origins) assert.ok(!/staging|tradezip-admin|console/i.test(o), `VA tile leaks origin ${o}`)
     assert.equal(t.badge, null)
   }
+})
+
+test('the Knowledge tile replaces Workflows: a launcher page for admins and assistants', () => {
+  assert.equal(APPS.some(a => a.key === 'workflows'), false)
+  const k = APPS.find(a => a.key === 'knowledge')
+  assert.equal(k.url, '/knowledge.html')
+  assert.equal(k.sso, false)
+  assert.equal(k.embed, true)
+  assert.equal(k.icon, 'ti-book')
+  for (const role of ['superadmin', 'admin', 'va']) assert.equal(appFor('knowledge', role).label, 'Knowledge', role)
+})
+
+test('tile origins: the addresses an embedded app may message the launcher from', () => {
+  assert.deepEqual(appOrigins(APPS.find(a => a.key === 'training')), ['https://offload-crew-training.vercel.app', 'https://training.offloadcrew.com'])
+  assert.deepEqual(appOrigins(APPS.find(a => a.key === 'knowledge')), [], 'launcher pages use the launcher origin')
+  const byKey = Object.fromEntries(tilesFor('va', ENV).map(t => [t.key, t]))
+  assert.deepEqual(byKey.training.origins, ['https://offload-crew-training.vercel.app', 'https://training.offloadcrew.com'])
+  assert.deepEqual(byKey.knowledge.origins, [])
+  // The same whichever address is in use, so a redirect between them still counts.
+  assert.deepEqual(tilesFor('va', { ...ENV, LAUNCHER_USE_CUSTOM_DOMAINS: '1' }).find(t => t.key === 'training').origins, byKey.training.origins)
 })
 
 test('People is super-admin only, in tiles and in appFor', () => {
@@ -113,7 +134,7 @@ test('CRM Staging only sends tickets to the CRM\'s own test addresses', () => {
 
 test('tilesFor: only the browser-safe fields are returned', () => {
   for (const t of tilesFor('superadmin', ENV)) {
-    assert.deepEqual(Object.keys(t).sort(), ['badge', 'color', 'embed', 'icon', 'key', 'label', 'url'])
+    assert.deepEqual(Object.keys(t).sort(), ['badge', 'color', 'embed', 'icon', 'key', 'label', 'origins', 'url'])
   }
 })
 
@@ -121,7 +142,7 @@ test('staging tiles open in a tab; everything else may open inside the launcher'
   const byKey = Object.fromEntries(tilesFor('superadmin', ENV).map(t => [t.key, t]))
   assert.equal(byKey['quotes-staging'].embed, false)
   assert.equal(byKey['console-staging'].embed, false)
-  for (const k of ['quotes', 'training', 'invoices', 'workflows', 'people']) assert.equal(byKey[k].embed, true, k)
+  for (const k of ['quotes', 'training', 'invoices', 'knowledge', 'people']) assert.equal(byKey[k].embed, true, k)
 })
 
 test('appFor: admin-only apps need admin or above; unknown keys resolve to nothing', () => {
@@ -137,12 +158,12 @@ test('appFor: admin-only apps need admin or above; unknown keys resolve to nothi
 test('custom-domain toggle switches every external tile, leaves launcher pages alone', () => {
   const legacy = tilesFor('superadmin', ENV)
   const custom = tilesFor('superadmin', { ...ENV, LAUNCHER_USE_CUSTOM_DOMAINS: '1' })
-  const local = new Set(['Workflows', 'People'])
+  const local = new Set(['Knowledge', 'People'])
   for (const t of legacy) if (!local.has(t.label)) assert.match(t.url, /\.vercel\.app/)
   for (const t of custom) if (!local.has(t.label)) assert.match(t.url, /^https:\/\/[a-z-]+\.offloadcrew\.com$/)
-  assert.equal(custom.find(t => t.label === 'Workflows').url, '/workflow.html')
+  assert.equal(custom.find(t => t.label === 'Knowledge').url, '/knowledge.html')
   assert.equal(custom.find(t => t.label === 'People').url, '/people.html')
-  assert.equal(tileUrl(APPS.find(a => a.key === 'workflows'), true), '/workflow.html')
+  assert.equal(tileUrl(APPS.find(a => a.key === 'knowledge'), true), '/knowledge.html')
 })
 
 test('a list of keys switches only those tiles to offloadcrew.com', () => {

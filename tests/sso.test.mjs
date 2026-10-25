@@ -136,9 +136,9 @@ test('launch: VA asking for an admin app gets the same 404 as an unknown app', a
   }
 })
 
-test('launch: Workflows needs no ticket', async () => {
-  const res = await callLaunch(lreq('tok:va@example.com', { app: 'workflows' }))
-  assert.deepEqual(res.body, { url: '/workflow.html', sso: false })
+test('launch: Knowledge, a page inside the launcher, needs no ticket', async () => {
+  const res = await callLaunch(lreq('tok:va@example.com', { app: 'knowledge' }))
+  assert.deepEqual(res.body, { url: '/knowledge.html', sso: false })
 })
 
 test('launch: without a signing key, or with a broken one, apps open without SSO', async () => {

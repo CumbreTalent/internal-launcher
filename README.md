@@ -8,8 +8,8 @@ you have opened keep running, so switching between them is instant.
 | Role | Sees |
 |---|---|
 | **Super admin** | every tile, plus **People**, where people are added and removed |
-| **Admin** | every tile except People: Quote Builder, QB Staging, Admin Staging, Crew Training, Invoice Chaser, CRM, CRM Staging, Workflows |
-| **Assistant** | Quote Builder, Crew Training, Invoice Chaser, CRM, Workflows |
+| **Admin** | every tile except People: Quote Builder, QB Staging, Admin Staging, Crew Training, Invoice Chaser, CRM, CRM Staging, Knowledge (with Sales plays) |
+| **Assistant** | Quote Builder, Crew Training, Invoice Chaser, CRM, Knowledge (without Sales plays) |
 
 People sign in with their **Quote Builder** login. The super admin is set only
 by `LAUNCHER_SUPERADMIN_EMAILS` in Vercel, so no screen can create one.
@@ -32,6 +32,13 @@ the CRM has a staging copy; then delete the `hidden: true` line on its tile.
 The tile list lives on the server (`api/_apps.js`) and reaches the browser
 already filtered by role: an assistant's browser never receives the staging,
 console or People addresses at all.
+
+**Knowledge** (`knowledge.html`) is the knowledge center for admins and
+assistants: every service on offloadcrew.com broken into tasks, what the
+assistant must know, VA onboarding and client onboarding, plus the VA
+foundation, the client path, the access catalog and the plans. It replaced the
+Workflows applet. Its admin-only part, Sales plays, is served by `/api/knowledge`
+to admins only; see "The Knowledge tile" below.
 
 ## Adding and removing people (super admin)
 
@@ -153,8 +160,69 @@ Open `api/_apps.js`. Each tile is one object:
 }
 ```
 
-`npm test` checks that no admin-only address can reach an assistant, and that
-People stays super-admin only.
+`npm test` checks that no admin-only address can reach an assistant, that
+People stays super-admin only, and that the Knowledge page holds no sales
+material.
+
+## The Knowledge tile
+
+- **Source:** `data/knowledge.json`, the single source of truth: service areas
+  with their tasks, primer, VA onboarding and client onboarding; plans; client
+  types; the VA foundation; the client path; the access catalog; the admin-only
+  `sales` block; and `academyLinks`, which documents the Crew Training deep-link
+  format. Ids are stable snake_case so other tools can reference them.
+- **Build:** edit the JSON (or the page itself, `scripts/knowledge-template.html`),
+  then
+
+  ```bash
+  node scripts/build-knowledge.mjs
+  ```
+
+  and commit the two outputs: `knowledge.html` (the template with the data
+  inlined, minus `sales`) and `api/_knowledge-sales.js` (the `sales` block for
+  the route). `npm test` fails while either is stale.
+- **Admins only:** `sales` (discovery questions, offer status against the
+  website, the "I already have someone" pivot, guardrails, open items) is not
+  in the page. `GET /api/knowledge`, authenticated like `/api/apps`, returns
+  `{ sales }` to admins and the super admin and 403 to everyone else. The page
+  asks only after `/api/apps` reports an admin role, then shows the Sales view
+  and its rail entry. `data/` is in `.vercelignore`, so the full JSON never
+  deploys and cannot be fetched as a static file.
+- **Addresses:** `#<view>` (`overview`, `subs`, `billing`, `projects`, `bids`,
+  `office`, `va`, `path`, `access`, `clients`, `sales`) or `#<areaId>/<tab>`
+  with tab one of `tasks`, `know`, `va`, `client`. Sign-in keeps the fragment.
+- **Training links:** every training reference, `desk-compliance · Reading &
+  Verifying a COI` or `day-3 · Invoicing, Draws & Payment Tracking`, is a link
+  into Crew Training at `#module/<id>/<slug>` or `#day/<n>/<slug>` (slug: the
+  heading lowercased, non-alphanumerics to `-`, a trailing parenthetical
+  dropped; a reference with no heading links to the module alone). Inside the
+  launcher the page asks the launcher to open the Crew Training tile, signed
+  in, at that fragment (below). On its own, the chip is a plain link to the
+  academy in a new tab.
+
+### Apps opening other apps
+
+An app running inside the launcher can ask it to open another tile:
+
+```js
+window.parent.postMessage({ type: 'offload:open-app', key: 'training', hash: '#module/desk-compliance/reading-verifying-a-coi' }, '*')
+```
+
+The rules are in `open-app.js` (shared with its test). The launcher acts only
+when the message comes from a frame it opened itself, from that tile's own
+address (`origins` in the `/api/apps` answer: the app's vercel.app and
+offloadcrew.com homes; for a page inside the launcher, the launcher's own
+origin), and `key` names a tile this person may open. Unknown keys, tiles the
+role cannot see and other origins are ignored; a `hash` that is not a plain
+fragment is dropped. It then opens the tile as a tap would and puts `hash` on
+the final address, after the `/api/launch?ticket=…` query for SSO apps.
+
+Receivers that hand the session over in the fragment (`sendSessionRedirect`,
+every Supabase app, Crew Training included) replace that fragment on the way
+in, so once the frame has loaded the launcher points it at the fragment again
+(`https://training…/#module/…`): the app sees a `hashchange` on its front
+page. An app opened in a new tab instead (one that cannot be framed yet) loses
+the fragment on those receivers until the receiver forwards it.
 
 ## Put it on offloadcrew.com
 
@@ -242,8 +310,10 @@ runs the role, People, ticket and receiver tests with Node's built-in runner.
   of each app. Use each app's own sign-out on a shared computer.
 - A page that refuses to be framed, like Stripe's onboarding, won't show
   inside the launcher. Use the app bar's "open in a new tab" button for those.
-- `workflow.html` is a static file. It bounces visitors without a session to
-  the sign-in form, but anyone with its address can still fetch it.
+- `knowledge.html` and `people.html` are static files. They bounce visitors
+  without a session to the sign-in form, but anyone with the address can still
+  fetch them. That is why the sales material is not in `knowledge.html`: it
+  comes from `/api/knowledge`, behind the role check, and `data/` never deploys.
 
 ## Use it like an app
 
