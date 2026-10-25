@@ -78,6 +78,7 @@ const handlers = {
   '/api/config': (await import('../api/config.js')).default,
   '/api/launch': (await import('../api/launch.js')).default,
   '/api/people': (await import('../api/people.js')).default,
+  '/api/knowledge': (await import('../api/knowledge.js')).default,
 }
 const { supabaseLaunch, receive, sendPage, sendRedirect } = await import('../receiver/_launcher.js')
 
@@ -212,7 +213,7 @@ const launcher = http.createServer(async (req, res) => {
 
   const rel = p === '/' ? '/index.html' : decodeURIComponent(p)
   const file = path.join(ROOT, path.normalize(rel))
-  const blocked = !file.startsWith(ROOT + path.sep) || /^\/(api|tests|receiver|scripts|node_modules|supabase|\.git|\.claude)(\/|$)/.test(rel) || /^\/\.(env|launcher-keys)/.test(rel)
+  const blocked = !file.startsWith(ROOT + path.sep) || /^\/(api|data|tests|receiver|scripts|node_modules|supabase|\.git|\.claude)(\/|$)/.test(rel) || /^\/\.(env|launcher-keys)/.test(rel)
   if (blocked || !fs.existsSync(file) || !fs.statSync(file).isFile()) { res.statusCode = 404; return res.end('Not found') }
   res.setHeader('Content-Type', MIME[path.extname(file)] || 'application/octet-stream')
   res.setHeader('Cache-Control', 'no-store')
@@ -229,7 +230,12 @@ header{background:#141824;color:#fff;padding:14px 18px;font-weight:600}main{padd
 .ok{background:#e7f6ec;border:1px solid #a9dcb9;border-radius:12px;padding:16px}.no{background:#fff3e6;border:1px solid #f2c38b;border-radius:12px;padding:16px}
 button{font:inherit;margin-top:12px;padding:8px 12px;border-radius:8px;border:1px solid #ccd;background:#fff;cursor:pointer}</style></head>
 <body><header>${app.name} <small style="opacity:.6;font-weight:400">· mock app on port ${app.port}</small></header><main id="m">Loading…</main>
+<p id="deep" style="padding:0 18px;font:13px ui-monospace,Menlo,monospace;color:#555"></p>
 <script>
+  // Shows the deep link the launcher asked for (a real app would route on it).
+  const showHash = () => { document.getElementById('deep').textContent = location.hash && !/access_token=/.test(location.hash) ? 'Opened at ' + location.hash : '' }
+  window.addEventListener('hashchange', showHash)
+  setTimeout(showHash, 0)
 ${app.kind === 'supabase' ? `
   const f = new URLSearchParams(location.hash.slice(1))
   if (f.get('access_token') && f.get('refresh_token')) {

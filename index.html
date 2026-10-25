@@ -281,14 +281,16 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="auth.js"></script>
+  <script src="open-app.js"></script>
   <script>
     const $ = id => document.getElementById(id)
     const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
     const HOME_TITLE = 'Offload Crew Launcher'
 
     let tiles = []                 // what /api/apps returned for this person
-    const running = new Map()      // key → { tile, el, iframe, splash, home }
+    const running = new Map()      // key → { tile, el, iframe, splash, home, hash }
     let current = null             // key of the app on screen, or null
+    const pendingHash = new Map()  // key → fragment to open the app at, until it starts
 
     // ── Views on the home screen ──
     function show(which) {
@@ -403,7 +405,8 @@
           <div class="splash-actions hidden"></div>
         </div>`
       $('frames').appendChild(el)
-      const rec = { tile, el, iframe: null, splash: el.querySelector('.splash'), home: null }
+      const rec = { tile, el, iframe: null, splash: el.querySelector('.splash'), home: null, hash: pendingHash.get(tile.key) || '' }
+      pendingHash.delete(tile.key)
       running.set(tile.key, rec)
       launchInto(rec)
       return rec
@@ -440,16 +443,39 @@
 
       const target = new URL(res.data.url, location.href)
       rec.home = target.origin === location.origin ? target.pathname : target.origin + '/'
+      // A deep link rides on the fragment, after the ticket query. Browsers keep
+      // it across the receiver's redirect when that redirect has no fragment of
+      // its own.
+      if (rec.hash) target.hash = rec.hash
       if (rec.iframe) rec.iframe.remove()
       const f = document.createElement('iframe')
       f.title = rec.tile.label
       f.allow = 'camera; microphone; geolocation; clipboard-read; clipboard-write; fullscreen; web-share; display-capture; autoplay'
       f.referrerPolicy = 'strict-origin'
-      f.addEventListener('load', () => rec.splash.classList.add('gone'))
+      f.addEventListener('load', () => {
+        rec.splash.classList.add('gone')
+        // Apps whose receiver hands the session over in the fragment
+        // (#access_token=…) replace the deep link on the way in. Once the app
+        // has loaded, signed in, point it at the deep link; when the fragment
+        // did survive this is the same address and nothing happens.
+        if (rec.hash && res.data.sso) deepLink(rec, rec.hash)
+        rec.hash = ''
+      })
       f.src = target.toString()
       rec.iframe = f
       rec.el.insertBefore(f, rec.splash)
       splashState(rec, { status: res.data.sso ? 'Signing you in…' : 'Opening…', spinning: true })
+    }
+
+    // Point a running app at a fragment: a same-page jump when it sits on its
+    // front page, a plain load of that page otherwise. Cross-origin frames
+    // allow replace() but not reading where they are.
+    function deepLink(rec, hash) {
+      if (!rec.iframe || !rec.home) return
+      const url = new URL(rec.home, location.href)
+      url.hash = hash
+      try { rec.iframe.contentWindow.location.replace(url.toString()) }
+      catch (e) { rec.iframe.src = url.toString() }
     }
 
     function closeApp(key) {
@@ -464,7 +490,7 @@
     // ── Opening in a new tab (other sites, staging, or on request) ──
     // The tab is opened straight away, while the click still counts as a click,
     // then pointed at the signed-in address once the launcher has it.
-    async function openExternal(tile) {
+    async function openExternal(tile, hash) {
       const w = window.open('about:blank', '_blank')
       if (w) {
         try {
@@ -481,19 +507,41 @@
         if (w) w.close()
         return toast(esc((res.data && res.data.error) || `Could not open ${tile.label}. Try again.`))
       }
-      if (w && !w.closed) w.location.replace(res.data.url)
-      else toast(`Your browser blocked the new tab. <a href="${esc(res.data.url)}" target="_blank" rel="noopener">Open ${esc(tile.label)}</a>`)
+      const url = new URL(res.data.url, location.href)
+      if (hash) url.hash = hash
+      if (w && !w.closed) w.location.replace(url.toString())
+      else toast(`Your browser blocked the new tab. <a href="${esc(url.toString())}" target="_blank" rel="noopener">Open ${esc(tile.label)}</a>`)
     }
 
-    function openTile(tile, btn) {
+    // Open a tile as a tap does; `hash` is a fragment to land on (a deep link
+    // another app asked for), on the final address.
+    function openTile(tile, btn, hash) {
       if (!tile) return
-      if (!canEmbed(tile)) return openExternal(tile)
+      if (!canEmbed(tile)) return openExternal(tile, hash)
       if (btn) {
         const r = btn.querySelector('.icon').getBoundingClientRect()
         $('stage').style.transformOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`
       }
+      if (hash) {
+        const rec = running.get(tile.key)
+        if (rec && rec.iframe && rec.home) deepLink(rec, hash)
+        else pendingHash.set(tile.key, hash)
+      }
       go(tile.key)
     }
+
+    // ── Requests from apps inside the launcher ──
+    // An embedded app may ask for another tile to open at a fragment, for
+    // example the Knowledge page sending a training reference to Crew Training:
+    //   window.parent.postMessage({ type: 'offload:open-app', key: 'training', hash: '#module/…' }, '*')
+    // open-app.js holds the rules: the message must come from a frame this
+    // launcher opened, from that tile's own address, and name a tile this
+    // person may open. Everything else is ignored.
+    window.addEventListener('message', e => {
+      const frames = [...running.values()].filter(r => r.iframe).map(r => ({ tile: r.tile, contentWindow: r.iframe.contentWindow }))
+      const req = LauncherMessages.openAppRequest(e, { frames, tiles, selfOrigin: location.origin })
+      if (req) openTile(req.tile, null, req.hash)
+    })
 
     // ── App bar ──
     $('home-btn').onclick = () => go(null)
@@ -575,7 +623,8 @@
 
       const params = new URLSearchParams(location.search)
 
-      // Arrived via a guarded page (workflow.html sends ?next=/workflow.html).
+      // Arrived via a guarded page (knowledge.html and people.html send
+      // ?next=<their path, and any fragment>).
       const next = params.get('next')
       if (next && /^\/[^/\\]/.test(next)) { location.replace(next); return }
 

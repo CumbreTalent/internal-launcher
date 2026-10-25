@@ -128,11 +128,16 @@ export const APPS = [
     embed: false,
   },
   {
-    key: 'workflows',
-    label: 'Workflows',
-    icon: 'ti-route',
+    // Inside the launcher: the knowledge center (services, onboarding, access).
+    // The page is built from data/knowledge.json by scripts/build-knowledge.mjs
+    // with the admin-only sales block left out; /api/knowledge serves that
+    // block to admins. Training references on the page deep-link into Crew
+    // Training through the launcher (see open-app.js).
+    key: 'knowledge',
+    label: 'Knowledge',
+    icon: 'ti-book',
     color: 'linear-gradient(160deg, #9b6fd4, #5b3aa8)',
-    url: '/workflow.html',
+    url: '/knowledge.html',
     sso: false,
     embed: true,
   },
@@ -229,6 +234,14 @@ export function appFor(key, role) {
   return app && allowed(app, role) ? app : null
 }
 
+// The addresses an app may speak to the launcher from while it is open inside
+// it (postMessage origins, see open-app.js): its current and future homes.
+// Pages inside the launcher have none; the launcher's own origin counts.
+export function appOrigins(app) {
+  if (app.url) return []
+  return [...new Set([app.legacy, app.custom].filter(Boolean).map(u => new URL(u).origin))]
+}
+
 // The tiles a role may open, in display order, with only the fields the
 // browser needs to draw them.
 export function tilesFor(role, env = process.env) {
@@ -243,5 +256,6 @@ export function tilesFor(role, env = process.env) {
       color: a.color,
       badge: a.badge || null,
       embed: a.embed !== false,
+      origins: appOrigins(a),
     }))
 }

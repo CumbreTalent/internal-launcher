@@ -1,0 +1,2405 @@
+{
+  "schema": "offload-knowledge/1",
+  "updatedOn": "2026-10-25",
+  "title": "Offload Crew Knowledge Center",
+  "sources": [
+    {
+      "name": "offloadcrew.com · Services",
+      "url": "https://www.offloadcrew.com/services.html"
+    },
+    {
+      "name": "offloadcrew.com · How it works",
+      "url": "https://www.offloadcrew.com/how-it-works.html"
+    },
+    {
+      "name": "offloadcrew.com · Pricing",
+      "url": "https://www.offloadcrew.com/pricing.html"
+    },
+    {
+      "name": "offloadcrew.com · FAQ",
+      "url": "https://www.offloadcrew.com/faq.html"
+    },
+    {
+      "name": "offloadcrew.com · Privacy, terms and refunds",
+      "url": "https://www.offloadcrew.com/legal.html"
+    },
+    {
+      "name": "Offload Crew Client Onboarding Checklist (Oct 20, 2026)",
+      "url": null
+    },
+    {
+      "name": "Crew Training app: five-day foundation, deep dives and six service desks (src/App.jsx, src/serviceDesks.js)",
+      "url": null
+    },
+    {
+      "name": "Offload CRM: services, accounts, assignments, contacts, tasks (supabase/schema.sql, README)",
+      "url": null
+    },
+    {
+      "name": "Offload Crew Launcher: workflow.html, the applet this replaces",
+      "url": null
+    },
+    {
+      "name": "Construction Back Office Deep Dive (Inside the GC Back Office), with review comments of Oct 21–22, 2026",
+      "url": null
+    }
+  ],
+  "company": {
+    "name": "OffloadCrew",
+    "tagline": "You run the jobs. We'll run the office.",
+    "positioning": "Back-office staffing for general contractors. Construction-trained, English-fluent remote assistants who work in the client's own email, phone line and software.",
+    "promises": [
+      "No upfront cost and no recruiting or placement fee; the client pays nothing until they have met their assistant and said yes",
+      "A hand-picked assistant within about a week of the first call; most GCs are working with them within two weeks",
+      "Every placement starts with a 2-week trial; cancel during it and pay only the prorated time worked, refunded within 10 business days",
+      "Onboarding is handled by Offload Crew: access and the first handoffs are set up so the assistant is useful from week one",
+      "The client owns every account and can revoke access at any time; every assistant signs a confidentiality agreement"
+    ],
+    "terms": {
+      "trialDays": 14,
+      "billing": "Monthly in advance, card or ACH",
+      "latePaymentPauseDays": 14,
+      "noticeDays": 14,
+      "refundBusinessDays": 10,
+      "replacement": "At Offload Crew's discretion; credit for days without coverage when the assistant is unavailable on Offload's side"
+    }
+  },
+  "plans": [
+    {
+      "id": "part_time",
+      "name": "Part-Time",
+      "hoursPerWeek": 20,
+      "priceRange": "$1,200–1,500 / month",
+      "bestFor": "GCs running 1–3 jobs",
+      "crmService": "Virtual assistant — part time",
+      "covers": [
+        "Sub scheduling and COI tracking",
+        "Invoicing and payment follow-up",
+        "Permits and inspections",
+        "Phones, email and calendar"
+      ]
+    },
+    {
+      "id": "full_time",
+      "name": "Full-Time",
+      "hoursPerWeek": 40,
+      "priceRange": "$2,000–2,500 / month",
+      "bestFor": "GCs running several jobs at once",
+      "crmService": "Virtual assistant — full time",
+      "covers": [
+        "Everything in Part-Time",
+        "Pay apps and change order paperwork",
+        "Bid invites and estimating support",
+        "Project coordination, RFIs and submittals",
+        "Bookkeeping and job costing"
+      ]
+    }
+  ],
+  "clientTypes": [
+    {
+      "id": "residential_gc",
+      "name": "Residential GC",
+      "description": "Running several homes, additions or renovations at once with a small office.",
+      "typicalPlan": "full_time",
+      "firstHandoffs": [
+        {
+          "label": "Sub scheduling across active jobs",
+          "tasks": [
+            "sub_scheduling"
+          ]
+        },
+        {
+          "label": "COI and lien waiver tracking",
+          "tasks": [
+            "coi_tracking",
+            "lien_waivers"
+          ]
+        },
+        {
+          "label": "Draw requests and invoicing",
+          "tasks": [
+            "invoicing_ar",
+            "pay_apps"
+          ]
+        },
+        {
+          "label": "Weekly owner progress updates",
+          "tasks": [
+            "owner_updates"
+          ]
+        }
+      ],
+      "likelyTools": [
+        "QuickBooks Online",
+        "Google Workspace or Microsoft 365",
+        "Buildertrend or CoConstruct",
+        "Spreadsheets"
+      ]
+    },
+    {
+      "id": "remodeler",
+      "name": "Remodeler or design-build",
+      "description": "Lots of smaller jobs and a lot of homeowner communication.",
+      "typicalPlan": "part_time",
+      "firstHandoffs": [
+        {
+          "label": "Lead follow-up and booking estimates",
+          "tasks": [
+            "lead_follow_up",
+            "phone_coverage"
+          ]
+        },
+        {
+          "label": "Selections and change order paperwork",
+          "tasks": [
+            "change_orders"
+          ]
+        },
+        {
+          "label": "Homeowner scheduling and updates",
+          "tasks": [
+            "calendar",
+            "owner_updates"
+          ]
+        },
+        {
+          "label": "Deposits, invoicing and payment follow-up",
+          "tasks": [
+            "invoicing_ar"
+          ]
+        }
+      ],
+      "likelyTools": [
+        "QuickBooks Online",
+        "Google Workspace",
+        "Jobber, Buildertrend or Houzz Pro",
+        "Tradezip Quote Builder when quoting through Offload"
+      ]
+    },
+    {
+      "id": "custom_builder",
+      "name": "Custom home builder",
+      "description": "Long builds with many selections, draws and vendors to keep track of.",
+      "typicalPlan": "full_time",
+      "firstHandoffs": [
+        {
+          "label": "Construction loan draw packages",
+          "tasks": [
+            "pay_apps",
+            "lien_waivers"
+          ]
+        },
+        {
+          "label": "Selections and allowance tracking",
+          "tasks": [
+            "change_orders",
+            "accounts_payable"
+          ]
+        },
+        {
+          "label": "Vendor and material orders",
+          "tasks": [
+            "material_orders",
+            "vendor_follow_up"
+          ]
+        },
+        {
+          "label": "Client updates with site photos",
+          "tasks": [
+            "owner_updates",
+            "daily_logs"
+          ]
+        }
+      ],
+      "likelyTools": [
+        "QuickBooks Online",
+        "Buildertrend or CoConstruct",
+        "Lender draw portals",
+        "Google Workspace or Microsoft 365"
+      ]
+    },
+    {
+      "id": "light_commercial",
+      "name": "Light commercial GC",
+      "description": "More formal paperwork: pay apps, submittals and compliance documents.",
+      "typicalPlan": "full_time",
+      "firstHandoffs": [
+        {
+          "label": "AIA G702/G703 pay applications",
+          "tasks": [
+            "pay_apps",
+            "retainage"
+          ]
+        },
+        {
+          "label": "RFI and submittal logs",
+          "tasks": [
+            "rfis_submittals"
+          ]
+        },
+        {
+          "label": "Sub COIs and prequalification",
+          "tasks": [
+            "coi_tracking",
+            "sub_onboarding",
+            "prequalification"
+          ]
+        },
+        {
+          "label": "Bid invites and bid leveling",
+          "tasks": [
+            "invitations_to_bid",
+            "bid_leveling"
+          ]
+        }
+      ],
+      "likelyTools": [
+        "QuickBooks Online",
+        "Procore",
+        "Microsoft 365 and Excel",
+        "Bid platforms (BuildingConnected, PlanHub, iSqFt)",
+        "Owner or lender billing portals"
+      ]
+    },
+    {
+      "id": "specialty",
+      "name": "Specialty contractor",
+      "description": "Electrical, plumbing, HVAC, concrete and other trades working under GCs.",
+      "typicalPlan": "part_time",
+      "firstHandoffs": [
+        {
+          "label": "Billing GCs and tracking retainage",
+          "tasks": [
+            "invoicing_ar",
+            "retainage"
+          ]
+        },
+        {
+          "label": "COIs and compliance docs for GCs",
+          "tasks": [
+            "coi_tracking"
+          ]
+        },
+        {
+          "label": "Crew and job scheduling",
+          "tasks": [
+            "sub_scheduling",
+            "calendar"
+          ]
+        },
+        {
+          "label": "Quote and bid follow-up",
+          "tasks": [
+            "lead_follow_up",
+            "proposals"
+          ]
+        }
+      ],
+      "likelyTools": [
+        "QuickBooks Online",
+        "ServiceTitan or Jobber",
+        "Google Workspace",
+        "GC billing portals (Textura, GCPay)"
+      ]
+    }
+  ],
+  "trialTiming": {
+    "days_4_7": "Trial days 4–7: first handoffs",
+    "week_2": "Trial week 2: bigger tasks, GC reviews each before it goes out",
+    "after_trial": "Days 15–90: rest of the plan, handed off at the day 30 review"
+  },
+  "serviceAreas": [
+    {
+      "id": "subs",
+      "code": "SV",
+      "name": "Subcontractors & vendors",
+      "short": "Subs & vendors",
+      "color": "#e8651a",
+      "tagline": "Your assistant confirms sub schedules and keeps insurance and paperwork current.",
+      "example": "The plumber's start date moves. Your assistant confirms the new date with the plumber and updates the drywall sub.",
+      "outcome": "Every sub shows up when scheduled with current insurance and paperwork, and every draw has its waivers.",
+      "planNote": "Part-Time covers sub scheduling and COI tracking. Full-Time covers all six tasks.",
+      "tasks": [
+        {
+          "id": "sub_scheduling",
+          "name": "Sub scheduling",
+          "plan": "part_time",
+          "trial": "days_4_7",
+          "what": "Confirm start dates and reschedule when the job moves.",
+          "cadence": "Day-before confirmations every working day; a two-week lookahead refreshed weekly",
+          "approval": "The VA confirms and reschedules within the limits the GC sets. Anything that moves the critical path goes to the GC first.",
+          "deliverables": [
+            "Day-before confirmation log",
+            "Two-week lookahead per job"
+          ],
+          "training": [
+            "desk-day-to-day · Sub Confirmations & the Lookahead"
+          ]
+        },
+        {
+          "id": "coi_tracking",
+          "name": "COI tracking",
+          "plan": "part_time",
+          "trial": "days_4_7",
+          "what": "Collect certificates and chase renewals before they lapse.",
+          "cadence": "Weekly expiry sweep; renewal requests at 30, 14 and 7 days before expiry; daily check on anyone starting tomorrow",
+          "approval": "The VA chases and flags. The GC decides whether a sub with a lapsed certificate works; the VA never waives a requirement. Whether coverage truly satisfies the contract (endorsement wording, exclusions) is the GC's risk judgment, not the VA's.",
+          "deliverables": [
+            "COI tracker: carrier, policy dates, expiry, renewal reminders",
+            "Block notice template"
+          ],
+          "training": [
+            "desk-compliance · Reading & Verifying a COI",
+            "desk-compliance · Expirations, Blocking & Audit Readiness"
+          ]
+        },
+        {
+          "id": "lien_waivers",
+          "name": "Lien waivers",
+          "plan": "full_time",
+          "trial": "week_2",
+          "what": "Collect conditional and unconditional waivers each draw.",
+          "cadence": "Monthly, tied to each draw: conditional before the pay app, unconditional after payment clears",
+          "approval": "The VA collects and matches every waiver to the pay app line. The GC releases sub payments.",
+          "deliverables": [
+            "Lien waiver log per job and draw",
+            "Waiver matrix matched to the pay app",
+            "Complete waiver package for each pay app, so the PM only reviews and submits"
+          ],
+          "training": [
+            "desk-pay-app · Lien Waivers — Types, Sequencing & Matching",
+            "desk-pay-app · Preliminary Notices & Lien Risk"
+          ]
+        },
+        {
+          "id": "sub_onboarding",
+          "name": "Sub onboarding",
+          "plan": "full_time",
+          "trial": "week_2",
+          "what": "W-9s, agreements and contact info, filed and current.",
+          "cadence": "Per new sub, then an annual refresh of W-9s, licenses and agreements",
+          "approval": "The GC signs sub agreements. The VA prepares, sends, chases and files. W-9s hold taxpayer IDs: they stay in the GC's own drive or accounting system, never in Offload tools, email or chat.",
+          "deliverables": [
+            "Compliance matrix (one row per sub)",
+            "Audit-ready sub file per trade partner",
+            "Vendor record set up in the GC's accounting system for the bookkeeper to approve, where the GC's QuickBooks access covers it"
+          ],
+          "training": [
+            "desk-compliance · W-9s, Licenses, Agreements & Onboarding",
+            "desk-compliance · The Compliance Matrix"
+          ]
+        },
+        {
+          "id": "material_orders",
+          "name": "Material orders",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Place orders, confirm deliveries, track backorders.",
+          "cadence": "As jobs need; delivery confirmations in the day-before call",
+          "approval": "Orders under the amount the GC sets go out alone. Above it, the GC approves first.",
+          "deliverables": [
+            "Delivery and backorder tracker"
+          ],
+          "training": [
+            "desk-day-to-day · Sub Confirmations & the Lookahead (deliveries and material orders)"
+          ]
+        },
+        {
+          "id": "vendor_follow_up",
+          "name": "Vendor follow-up",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Quotes, lead times and returns.",
+          "cadence": "As needed; open quotes chased every 2–3 days",
+          "approval": "The VA chases and compares. The GC picks the vendor.",
+          "deliverables": [
+            "Open quote and lead-time list"
+          ],
+          "training": [
+            "desk-bid · Sub Coverage & Bid Leveling (clarifying a sub's number)"
+          ]
+        }
+      ],
+      "vaOnboarding": {
+        "requiredModules": [
+          {
+            "module": "desk-compliance",
+            "title": "Sub Compliance",
+            "for": "both",
+            "why": "COIs, endorsements, W-9s, licenses and the compliance matrix are the core of this area"
+          },
+          {
+            "module": "desk-day-to-day",
+            "title": "Day-to-Day Coverage",
+            "for": "both",
+            "why": "Day-before confirmations, the two-week lookahead, deliveries and material orders"
+          },
+          {
+            "module": "desk-pay-app",
+            "title": "Pay App & Lien Waiver Desk",
+            "for": "full_time",
+            "why": "The lien waiver and preliminary notice sections, once waivers are in the plan"
+          }
+        ],
+        "brushUp": [
+          "Read an ACORD 25 and run the verification checklist on every certificate: insured name, the GC as certificate holder, additional-insured endorsement, limits, policy dates",
+          "The 30-day expiration rule and the block notice: you flag, you never waive",
+          "Workers' comp exemptions and ghost policies, and what to do when something doesn't match",
+          "Day-before confirmation script in English and Spanish, and what goes in the two-week lookahead",
+          "The four lien waiver types and the monthly sequence; match every waiver to the pay app before payment is released (Full-Time)",
+          "New sub onboarding sequence: W-9, license check, agreement, safety documents, filed in the audit file",
+          "Delivery and backorder tracking, and the GC's order limit",
+          "The terms inside a COI: additional insured needs an endorsement, certificate holder gives no rights, waiver of subrogation, primary and non-contributory",
+          "The lien waiver worked example: conditional with the pay app, unconditional after the check, finals at the end of the job"
+        ],
+        "readiness": [
+          "Pass the Sub Compliance quiz and assignment in Crew Training",
+          "Pass the Day-to-Day Coverage quiz and assignment",
+          "Practical: verify three sample COIs and say which sub is blocked from starting and why",
+          "Practical: write a day-before confirmation text and a COI renewal request in the client's voice",
+          "Full-Time: build a waiver matrix for one sample draw from a pay app"
+        ],
+        "firstWeekSetup": [
+          "Build the COI tracker from the GC's sub list: carrier, policy dates, expiry, renewal reminders",
+          "Collect W-9s, signed sub agreements and contact info for every active sub",
+          "Set up the lien waiver log per job and draw, conditional and unconditional (Full-Time)",
+          "Get supplier accounts and ordering methods; start delivery and backorder tracking (Full-Time)",
+          "Agree how you introduce yourself to subs and set up the email signature",
+          "Send the first day-before confirmations on day 4 and the first lookahead by the end of week 1"
+        ]
+      },
+      "clientOnboarding": {
+        "techStack": [
+          {
+            "tool": "Company email on the GC's domain",
+            "need": "required",
+            "purpose": "Every sub and vendor message goes out under the company name"
+          },
+          {
+            "tool": "Shared drive (Google Drive, OneDrive or Dropbox)",
+            "need": "required",
+            "purpose": "Sub files, COIs, W-9s, agreements, job schedules"
+          },
+          {
+            "tool": "Spreadsheet (Google Sheets or Excel)",
+            "need": "required",
+            "purpose": "COI tracker, lookahead, waiver log and delivery tracker, unless the construction platform keeps them"
+          },
+          {
+            "tool": "Construction platform (Buildertrend, Procore, CoConstruct)",
+            "need": "if_used",
+            "purpose": "Schedule, sub directory and document log live there instead of spreadsheets"
+          },
+          {
+            "tool": "Phone line for subs",
+            "need": "required",
+            "purpose": "Confirmation calls and texts. Offload assigns the client a Quo number the VA works from; the GC can forward their line to it"
+          },
+          {
+            "tool": "Supplier accounts (lumber yard, electrical and plumbing supply)",
+            "need": "if_used",
+            "purpose": "Placing and tracking material orders (Full-Time)"
+          }
+        ],
+        "access": [
+          {
+            "system": "Company email",
+            "level": "Own mailbox or delegate access",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3"
+          },
+          {
+            "system": "Job files / shared drive",
+            "level": "Edit on the jobs folder",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3"
+          },
+          {
+            "system": "Job schedules",
+            "level": "View; edit if the VA keeps the schedule",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3"
+          },
+          {
+            "system": "Construction platform",
+            "level": "User seat with schedule and documents",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3, if used"
+          },
+          {
+            "system": "Client's Quo number",
+            "level": "Member of the number",
+            "grantedBy": "Offload admin (Quo, then Refresh from Quo in the CRM)",
+            "when": "Before day 1"
+          },
+          {
+            "system": "Supplier accounts",
+            "level": "Authorized to order up to the GC's limit",
+            "grantedBy": "GC",
+            "when": "When material orders are handed off"
+          }
+        ],
+        "inputs": [
+          "Sub and vendor list: trade, contact, active jobs",
+          "Current job schedules so start dates can be confirmed",
+          "The insurance requirements the GC holds subs to: limits, additional insured, workers' comp",
+          "Existing COIs, W-9s and sub agreements, wherever they live today",
+          "Supplier accounts and the ordering method for each (Full-Time)"
+        ],
+        "decisions": [
+          "Which reschedules the VA can confirm alone, and which go to the GC first",
+          "The material order amount the VA can approve alone (Full-Time)",
+          "What happens when a sub's COI lapses: held off site, or the GC decides case by case",
+          "How the VA introduces themself to subs: title, signature, phone number"
+        ]
+      },
+      "primer": {
+        "why": "Claims travel up the chain. If a sub's worker is injured or a sub damages the building, the GC and often the owner are pulled in, so the owner's contract requires the GC to prove every sub is insured. No valid COI generally means the sub should not be on site, and many GCs hold payment until one is on file. A lien waiver protects the owner from paying twice: a sub who is not paid can file a mechanic's lien on the property, so owners and lenders will not release payment without waivers from everyone on the job.",
+        "terms": [
+          "ACORD 25: the standard one-page certificate of insurance. A summary, not the policy.",
+          "Coverages a GC typically requires: general liability, workers' comp, commercial auto, umbrella or excess on larger jobs, professional liability only for design-build trades. Limits come from the contract.",
+          "Additional insured: the GC is added to the sub's policy. It needs an endorsement, not just a name typed on the form.",
+          "Certificate holder: who the certificate is issued to. It gives no rights under the policy.",
+          "Waiver of subrogation, and primary and non-contributory: often required by contract; check that each is ticked.",
+          "A certificate is only good until the earliest expiration date on it.",
+          "W-9: the IRS form with the sub's legal name and taxpayer ID, needed before anyone is paid because the GC reports sub payments at year end (1099s). A missing W-9 stops the payment, not the work.",
+          "Lien waiver types: conditional progress (signed with the pay app, valid only once paid), unconditional progress (after the check clears), conditional final and unconditional final.",
+          "Some states prescribe statutory waiver forms, Texas among them. Use the GC's forms, and never state a legal requirement to anyone."
+        ],
+        "goesWrong": [
+          "Certificates arrive with missing wording, wrong limits or the wrong entity name, and the loop starts again",
+          "Policies expire mid-project, so the chase has to start about 30 days ahead",
+          "A sub signs the wrong waiver type, or for $48,000 when $50,000 is owed, or three days late, and the owner holds the GC's whole payment",
+          "Worked example: an electrician owed $50,000 for September signs a conditional progress waiver in early October; the GC bundles it with every other sub's waiver and its own pay app; the owner releases payment; the GC pays the electrician; the electrician signs an unconditional progress waiver, collected with the next cycle; final versions come at the end of the job"
+        ]
+      }
+    },
+    {
+      "id": "billing",
+      "code": "BM",
+      "name": "Billing & money",
+      "short": "Billing",
+      "color": "#5b8dee",
+      "tagline": "Your assistant handles billing paperwork and keeps QuickBooks current for your accountant.",
+      "example": "At month end, your assistant drafts the pay app from your schedule of values and sends it to you to review.",
+      "outcome": "Billed on time every draw, overdue invoices chased on a cadence, and QuickBooks current for the accountant.",
+      "planNote": "Part-Time covers invoicing and payment follow-up. Full-Time adds pay apps, change orders, bookkeeping and job costing.",
+      "tasks": [
+        {
+          "id": "pay_apps",
+          "name": "Pay apps",
+          "plan": "full_time",
+          "trial": "week_2",
+          "what": "Draft AIA G702/G703 or progress billing from the schedule of values, with sub pay apps and waivers gathered into one package.",
+          "cadence": "Monthly: cutoff, percent complete from the PM, draft, reconcile, GC approval, submit, follow up until it lands",
+          "approval": "The GC approves every pay app before it goes to the owner or lender. Percent complete comes from the PM, never the VA.",
+          "deliverables": [
+            "Monthly pay app package (G702/G703 or the owner's form) with waivers attached",
+            "Billing calendar per job",
+            "Payment tracker: billed, approved, received, outstanding"
+          ],
+          "training": [
+            "desk-pay-app · The Schedule of Values",
+            "desk-pay-app · Reading & Building the G702/G703",
+            "desk-pay-app · Retainage, Cutoff & Follow-Up"
+          ]
+        },
+        {
+          "id": "invoicing_ar",
+          "name": "Invoicing & AR",
+          "plan": "part_time",
+          "trial": "week_2",
+          "what": "Send invoices and follow up on overdue payments.",
+          "cadence": "Invoices on the agreed schedule; reminders at the agreed intervals; AR aging reviewed weekly",
+          "approval": "Chase as firmly as the GC agreed; hand off to the GC at the agreed age or on any dispute.",
+          "deliverables": [
+            "AR aging",
+            "Reminder sequence and payment follow-up log",
+            "Aging report kept current for the owner or controller"
+          ],
+          "training": [
+            "day-3 · Invoicing, Draws & Payment Tracking",
+            "day-2 · Payment follow-up format and chasing payment script"
+          ]
+        },
+        {
+          "id": "accounts_payable",
+          "name": "Accounts payable",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Enter sub and supplier bills, prep payment runs.",
+          "cadence": "Bills entered as they arrive; payment run prepared on the GC's payment day",
+          "approval": "The GC approves bills and releases payment. The VA matches bills to POs and waivers and prepares the run.",
+          "deliverables": [
+            "Bill approval list for each payment run"
+          ],
+          "training": [
+            "desk-day-to-day · QuickBooks Entry & Job Costing (sub invoices to POs)"
+          ]
+        },
+        {
+          "id": "change_orders",
+          "name": "Change orders",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Write up, request and collect sub pricing, send for signature, track approvals, and make sure every approved change reaches the next pay app.",
+          "cadence": "As changes come up; log reviewed weekly so nothing is built before it is signed",
+          "approval": "The GC prices and approves every change order. The VA writes it up, sends it for signature, tracks it and adds it to the SOV once signed.",
+          "deliverables": [
+            "Change order log",
+            "Signed change orders filed per job"
+          ],
+          "training": [
+            "desk-pc · Change Orders — Signed Before Built",
+            "desk-pay-app · Change orders on the SOV"
+          ]
+        },
+        {
+          "id": "quickbooks",
+          "name": "QuickBooks",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Bookkeeping, job costing and reconciliation. Where the GC also runs project software, keep contract values and change orders matching in both and enter each sub invoice once.",
+          "cadence": "Receipts and bills coded weekly; reconciliation on the agreed schedule; weekly reports to the GC",
+          "approval": "The VA's role is entry and coding; the bookkeeper or accountant owns the books. Nothing is deleted or reclassified without the GC.",
+          "deliverables": [
+            "Job cost coding on every transaction",
+            "Weekly AR, AP and job cost reports"
+          ],
+          "training": [
+            "day-4 · QuickBooks Online",
+            "desk-day-to-day · QuickBooks Entry & Job Costing"
+          ]
+        },
+        {
+          "id": "retainage",
+          "name": "Retainage",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Track what's held and what's due back, both ways: held by the owner from the GC, and held by the GC from each sub.",
+          "cadence": "Updated every draw; release requested at closeout",
+          "approval": "The VA tracks and requests release; the GC confirms the amounts.",
+          "deliverables": [
+            "Retainage tracker per job: held and due back"
+          ],
+          "training": [
+            "desk-pay-app · Retainage, Cutoff & Follow-Up",
+            "desk-pc · Final pay app and retainage release"
+          ]
+        }
+      ],
+      "vaOnboarding": {
+        "requiredModules": [
+          {
+            "module": "day-3",
+            "title": "Construction Deep Dive (invoicing, draws and payment tracking)",
+            "for": "both",
+            "why": "Invoice components, draw schedules and chasing payments"
+          },
+          {
+            "module": "day-4",
+            "title": "Tools & Systems (QuickBooks Online)",
+            "for": "both",
+            "why": "Creating invoices, recording payments, the reports to run weekly"
+          },
+          {
+            "module": "desk-pay-app",
+            "title": "Pay App & Lien Waiver Desk",
+            "for": "full_time",
+            "why": "SOV, G702/G703, waivers, prelims, retainage and the monthly cadence"
+          },
+          {
+            "module": "desk-pc",
+            "title": "Project Coordinator (change orders)",
+            "for": "full_time",
+            "why": "The change order lifecycle and log"
+          },
+          {
+            "module": "desk-day-to-day",
+            "title": "Day-to-Day Coverage (QuickBooks entry and job costing)",
+            "for": "full_time",
+            "why": "Receipt capture, job cost coding, sub invoices to POs, reconciliation support"
+          }
+        ],
+        "brushUp": [
+          "Invoice components, payment terms and the chasing payment script and voicemail template",
+          "QuickBooks Online: create an invoice, record a payment, run the weekly AR aging and job cost reports",
+          "Build the SOV from the contract; know front-loading and why you never do it (Full-Time)",
+          "The G703 continuation sheet and G702 cover sheet; do the worked example until the math is automatic (Full-Time)",
+          "Stored materials, and reconciling the draft before it goes to the GC (Full-Time)",
+          "Change order lifecycle: signed before built, what every change order includes, the log (Full-Time)",
+          "Receipt capture and job cost coding; your role versus the bookkeeper's (Full-Time)",
+          "Retainage: what is held, when it is due back, and the billing portals owners and lenders use (Full-Time)",
+          "The two layers of billing: sub pay apps roll up into the GC's pay app, and retainage is tracked both ways",
+          "Why an unbilled change order is lost margin, and how to check that every approved change reached the pay app"
+        ],
+        "readiness": [
+          "Pass the Day 3 and Day 4 quizzes and assignments",
+          "Full-Time: pass the Pay App & Lien Waiver Desk quiz and assignment",
+          "Practical: draft payment reminders at the agreed intervals and the hand-off note to the GC",
+          "Practical (Full-Time): build a G702/G703 from a sample SOV with retainage and one change order, and reconcile it",
+          "Practical (Full-Time): code ten sample receipts to jobs and classes"
+        ],
+        "firstWeekSetup": [
+          "Load invoice templates, payment terms and the current AR aging; start the reminder sequence",
+          "Pay apps: get the schedule of values per job, the billing format and each billing date; build the billing calendar (Full-Time)",
+          "Custom builders: get each lender's draw package requirements (Full-Time)",
+          "Accounts payable: agree the bill approval flow and payment run day (Full-Time)",
+          "Change orders: get the template and signature tool; start the approval log (Full-Time)",
+          "QuickBooks: confirm the jobs or classes used for job costing and the reconciliation schedule (Full-Time)",
+          "Start a retainage tracker per job: held and due back (Full-Time)"
+        ]
+      },
+      "clientOnboarding": {
+        "techStack": [
+          {
+            "tool": "QuickBooks Online (or Desktop)",
+            "need": "required",
+            "purpose": "Invoicing, AR, AP, job costing, reconciliation"
+          },
+          {
+            "tool": "Spreadsheet (Google Sheets or Excel)",
+            "need": "required",
+            "purpose": "SOV, billing calendar, retainage tracker, change order log"
+          },
+          {
+            "tool": "Pay app format",
+            "need": "if_used",
+            "purpose": "AIA G702/G703 (AIA Contract Documents or Excel), the owner's form, or the platform's billing module (Procore, Buildertrend)"
+          },
+          {
+            "tool": "Owner or lender billing portals (Textura, GCPay, lender draw portals)",
+            "need": "if_used",
+            "purpose": "Submitting pay apps and draw packages"
+          },
+          {
+            "tool": "E-signature (DocuSign, PandaDoc, Adobe Sign, or the platform's)",
+            "need": "if_used",
+            "purpose": "Change orders and sub agreements"
+          },
+          {
+            "tool": "Payment collection (QuickBooks Payments, ACH, checks)",
+            "need": "required",
+            "purpose": "Knowing when money landed so reminders stop"
+          },
+          {
+            "tool": "Company email",
+            "need": "required",
+            "purpose": "Invoices, reminders and pay app submissions go out under the company name"
+          }
+        ],
+        "access": [
+          {
+            "system": "QuickBooks",
+            "level": "A user limited to the plan's tasks: AR and AP, no payroll, no bank feeds unless the GC chooses",
+            "grantedBy": "GC",
+            "when": "Trial week 2 for invoicing; widened at day 30 for AP and job costing"
+          },
+          {
+            "system": "Owner or lender billing portals",
+            "level": "Submitter login, or the GC submits what the VA prepares",
+            "grantedBy": "GC",
+            "when": "Before the first pay app"
+          },
+          {
+            "system": "E-signature account",
+            "level": "Sender seat; the GC remains the signer",
+            "grantedBy": "GC",
+            "when": "When change orders are handed off"
+          },
+          {
+            "system": "Bank",
+            "level": "None. At most read-only statements for reconciliation, and only if the GC chooses",
+            "grantedBy": "GC",
+            "when": "Never by default"
+          },
+          {
+            "system": "Accountant or bookkeeper",
+            "level": "Introduction and agreed division of work",
+            "grantedBy": "GC",
+            "when": "Before QuickBooks work starts"
+          }
+        ],
+        "inputs": [
+          "Invoice templates, payment terms and the current AR aging",
+          "Schedule of values per job, the billing format and each billing date (Full-Time)",
+          "Each lender's draw package requirements (custom builders)",
+          "The bill approval flow and payment run day (Full-Time)",
+          "Change order template and the signature tool (Full-Time)",
+          "QuickBooks jobs or classes used for job costing, and the reconciliation schedule (Full-Time)",
+          "Retainage terms per contract (Full-Time)"
+        ],
+        "decisions": [
+          "Every pay app goes through the GC before it reaches the owner or lender",
+          "How firmly to chase overdue invoices, and the age at which the GC takes over",
+          "Who talks to the accountant or bookkeeper, and what the VA may change in QuickBooks",
+          "The bill amount the VA can enter and schedule without a second look",
+          "Change orders: who prices them, who signs, and whether work may start before signature"
+        ]
+      },
+      "primer": {
+        "why": "GCs are paid monthly for the percentage of work complete, not when the building is done, and the pay application is that monthly package. The GC bills the owner, and every sub bills the GC with its own pay app, so the GC rolls sub pay apps up and pays subs after it is paid. Retainage, commonly 5 to 10 percent but set by contract, is held back both ways until the job is complete. If a pay app is late or rejected, or a waiver is missing, the GC's cash slips while payroll and materials still come due, and subs get paid late.",
+        "terms": [
+          "Schedule of values: the line-item breakdown of the contract price, agreed with the owner at the start. The skeleton of every pay app.",
+          "Percent complete per line: the PM's or superintendent's judgment of what is built. Never the VA's.",
+          "Stored materials: bought but not yet installed, sometimes billable with documentation.",
+          "Approved change orders are added to the contract and the SOV so they can be billed.",
+          "Backup: sub pay apps, lien waivers, and sometimes invoices and certified payroll, attached to support the numbers.",
+          "G702 is the summary cover sheet; G703 is the continuation sheet with the line items.",
+          "Pay-when-paid and pay-if-paid clauses tie a sub's payment to the owner paying the GC. Enforceability varies by state and wording, so never explain their legal effect."
+        ],
+        "goesWrong": [
+          "The monthly crunch: numbers, backup and waivers all gathered at the deadline",
+          "An Excel pay app with a broken formula or an out-of-date SOV, caught by the owner's side and returned, so payment slides by weeks",
+          "Retainage running totals per line and per sub drift out of sync",
+          "An approved change order never reaches the pay app and is never billed: lost margin for a business running at 5 to 15 percent",
+          "Unpaid owner invoices pile up because nobody is assigned to follow up consistently"
+        ]
+      }
+    },
+    {
+      "id": "projects",
+      "code": "PC",
+      "name": "Project coordination",
+      "short": "Projects",
+      "color": "#4caf7d",
+      "tagline": "Your assistant tracks permits, inspections and job documents, and keeps owners updated.",
+      "example": "An inspection passes. Your assistant logs the result, files the photos and updates the owner.",
+      "outcome": "No permit or inspection slips, the RFI and submittal logs are current, and owners hear from the office every week.",
+      "planNote": "Part-Time covers permits and inspections. Full-Time adds RFIs, submittals, owner updates, daily logs and closeout.",
+      "tasks": [
+        {
+          "id": "permits",
+          "name": "Permits",
+          "plan": "part_time",
+          "trial": "week_2",
+          "what": "Applications, follow-ups and hold times with the city.",
+          "cadence": "Status checked on every open permit weekly; resubmittals the day comments arrive",
+          "approval": "The GC or license holder signs applications. The VA prepares, submits where allowed, tracks and chases.",
+          "deliverables": [
+            "Open permit list per job with the portal and status"
+          ],
+          "training": [
+            "desk-day-to-day · Permits & Inspections",
+            "day-3 · Permits, Inspections & Compliance"
+          ]
+        },
+        {
+          "id": "inspections",
+          "name": "Inspections",
+          "plan": "part_time",
+          "trial": "week_2",
+          "what": "Schedule, confirm and log results.",
+          "cadence": "Booked as the schedule calls for them; confirmed the day before; result logged the same day",
+          "approval": "The VA books within the schedule the GC shares; the PM confirms the work is ready.",
+          "deliverables": [
+            "Inspection results log per job"
+          ],
+          "training": [
+            "desk-day-to-day · Permits & Inspections (inspection scheduling)"
+          ]
+        },
+        {
+          "id": "rfis_submittals",
+          "name": "RFIs & submittals",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Keep the logs current and chase responses.",
+          "cadence": "Logs updated as items move; overdue responses chased every 2–3 days; agree the volume with the GC, since a job can run to hundreds of submittals",
+          "approval": "The PM writes the RFI question and reviews submittals. The VA logs, sends, chases and files. Check each submittal package for completeness against the spec list before routing it.",
+          "deliverables": [
+            "RFI log",
+            "Submittal log with statuses and due dates"
+          ],
+          "training": [
+            "desk-pc · RFIs & Submittals"
+          ]
+        },
+        {
+          "id": "owner_updates",
+          "name": "Owner updates",
+          "plan": "full_time",
+          "trial": "week_2",
+          "what": "Weekly progress reports with photos.",
+          "cadence": "Weekly on the agreed day",
+          "approval": "The GC chooses: approve each update first, or let it go out in the agreed format.",
+          "deliverables": [
+            "Weekly owner update per job in the agreed format"
+          ],
+          "training": [
+            "day-2 · Status update format",
+            "desk-pc · Daily Logs, Meeting Minutes & the Document Set"
+          ]
+        },
+        {
+          "id": "daily_logs",
+          "name": "Daily logs",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Turn the PM's notes, voice memos or texts into a clean daily log in the GC's format; organize site photos by date, area and trade.",
+          "cadence": "Compiled daily from the field",
+          "approval": "The field sends; the VA compiles and files. Nothing is invented for a day with no notes.",
+          "deliverables": [
+            "Daily log per job",
+            "Photo folder per job"
+          ],
+          "training": [
+            "desk-pc · Daily Logs, Meeting Minutes & the Document Set"
+          ]
+        },
+        {
+          "id": "punch_closeout",
+          "name": "Punch & closeout",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Punch lists, warranties, O&Ms and final docs.",
+          "cadence": "From substantial completion to final payment",
+          "approval": "The PM walks the punch list; the VA tracks it and collects closeout documents from subs.",
+          "deliverables": [
+            "Punch list tracker",
+            "Closeout binder: warranties, O&Ms, final documents, final waivers"
+          ],
+          "training": [
+            "desk-pc · Punch List & Closeout"
+          ]
+        }
+      ],
+      "vaOnboarding": {
+        "requiredModules": [
+          {
+            "module": "day-3",
+            "title": "Construction Deep Dive (project lifecycle, permits)",
+            "for": "both",
+            "why": "How permits work and the VA's permit responsibilities"
+          },
+          {
+            "module": "desk-day-to-day",
+            "title": "Day-to-Day Coverage (permits and inspections)",
+            "for": "both",
+            "why": "Permit portals, status checks, resubmittals, inspection scheduling"
+          },
+          {
+            "module": "day-2",
+            "title": "English Communication (status updates)",
+            "for": "both",
+            "why": "The owner update format"
+          },
+          {
+            "module": "desk-pc",
+            "title": "Project Coordinator",
+            "for": "full_time",
+            "why": "RFIs, submittals, daily logs, meeting minutes, punch list and closeout"
+          }
+        ],
+        "brushUp": [
+          "How permits work in the client's jurisdictions, and where resubmittals and hold times come from",
+          "Booking inspections, the day-before confirmation and logging the result the same day",
+          "The status update format and writing in the owner's voice",
+          "RFIs: formal questions, the log, chasing; submittals: statuses and approval before install (Full-Time)",
+          "What goes in a daily log and how to compile it from the field (Full-Time)",
+          "The closeout binder and collecting closeout documents from subs (Full-Time)",
+          "RFI, submittal and change order: who each is between and the question it answers",
+          "Checking a submittal package for completeness against the spec list before it is routed"
+        ],
+        "readiness": [
+          "Pass the Day 2 and Day 3 quizzes and assignments",
+          "Full-Time: pass the Project Coordinator quiz and assignment",
+          "Practical: write a weekly owner update from a set of site photos and field notes",
+          "Practical: log a sample set of permits with their portals and next action",
+          "Practical (Full-Time): log three RFIs and two submittals and write the chase email"
+        ],
+        "firstWeekSetup": [
+          "List open permits per job and the city portals they sit in",
+          "Record how inspections are booked in each jurisdiction; start the results log",
+          "Owner updates: agree format, day of the week, photo source and who approves",
+          "Set where field notes and site photos land, and make a folder per job",
+          "Set up RFI and submittal logs with design-team contacts and due dates (Full-Time)",
+          "Set up punch list and closeout tracking: warranties, O&Ms, final documents (Full-Time)"
+        ]
+      },
+      "clientOnboarding": {
+        "techStack": [
+          {
+            "tool": "City or county permit portals",
+            "need": "required",
+            "purpose": "Applications, status, resubmittals and inspection booking, one portal per jurisdiction"
+          },
+          {
+            "tool": "Shared drive and photo source (phone photos, CompanyCam, the platform's photo log)",
+            "need": "required",
+            "purpose": "Daily logs, site photos and owner updates"
+          },
+          {
+            "tool": "Construction platform (Procore, Buildertrend, CoConstruct)",
+            "need": "if_used",
+            "purpose": "RFI, submittal, daily log and owner portal modules"
+          },
+          {
+            "tool": "Calendar",
+            "need": "required",
+            "purpose": "Inspections, site visits and owner meetings"
+          },
+          {
+            "tool": "Company email",
+            "need": "required",
+            "purpose": "Owner updates, RFI and submittal correspondence under the company name"
+          },
+          {
+            "tool": "Spreadsheet",
+            "need": "required",
+            "purpose": "Permit list, inspection log, RFI and submittal logs when there is no platform"
+          }
+        ],
+        "access": [
+          {
+            "system": "Permit portals",
+            "level": "Authorized agent or delegate on the GC's license account; some jurisdictions require the license holder to submit, in which case the VA prepares and tracks",
+            "grantedBy": "GC",
+            "when": "Trial week 2"
+          },
+          {
+            "system": "Construction platform",
+            "level": "User seat with RFI, submittal and daily log modules",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3, if used"
+          },
+          {
+            "system": "Calendar",
+            "level": "Edit",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3"
+          },
+          {
+            "system": "Job files / shared drive",
+            "level": "Edit on the jobs folder",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3"
+          },
+          {
+            "system": "Owner and design-team contacts",
+            "level": "Contact list and an introduction from the GC",
+            "grantedBy": "GC",
+            "when": "Before the first owner update"
+          }
+        ],
+        "inputs": [
+          "Open permits per job and the portal each sits in",
+          "How inspections are booked in each jurisdiction and who confirms the work is ready",
+          "Owner update format, day of the week and photo source",
+          "Design-team contacts and submittal due dates (Full-Time)",
+          "Where field notes and site photos land today",
+          "Closeout requirements per contract: warranties, O&Ms, final documents (Full-Time)"
+        ],
+        "decisions": [
+          "Whether the GC approves each owner update before it goes out, or only sets the format",
+          "What the VA may tell an owner directly, and what goes through the GC",
+          "Who confirms a job is ready before an inspection is booked",
+          "What goes in the daily log and who is responsible for sending field notes"
+        ]
+      },
+      "primer": {
+        "why": "RFIs, submittals and change orders are formal written processes because informal agreements on site are how disputes and unpaid work happen. Daily logs and photos are the evidence months later in a delay claim, a dispute over extra work or an insurance claim.",
+        "terms": [
+          "RFI: GC to architect. 'Your plans are unclear, what do you mean?' Logged with a number and date and tracked until answered.",
+          "Submittal: GC to architect. 'Here is the exact product I plan to use, do you approve?' Approved, approved with comments, or rejected. A project can have hundreds, each with a review window and long-lead items.",
+          "Change order: GC and owner. 'We are changing the deal, here is the new price and schedule.' Work should not proceed on a change without written approval.",
+          "Daily log: weather, who was on site, what work happened, deliveries, visitors, delays and safety events.",
+          "Permits and inspections vary by jurisdiction. Ask how each city or county works rather than assume."
+        ],
+        "goesWrong": [
+          "Unanswered RFIs hold up work, and the log's dates decide delay claims",
+          "A late or rejected submittal delays the schedule by weeks",
+          "Change logs fall behind, and approved changes are missed on the next pay app",
+          "PMs write logs late or from memory; photos sit unsorted on phones and personal cloud accounts with no names or dates"
+        ]
+      }
+    },
+    {
+      "id": "bids",
+      "code": "BE",
+      "name": "Bids & estimating support",
+      "short": "Bids",
+      "color": "#f0b429",
+      "tagline": "Your assistant handles the admin side of bidding so you can focus on the numbers.",
+      "example": "A bid is due in ten days. Your assistant sends plans to 12 subs, follows up, and lines up the quotes in one sheet.",
+      "outcome": "Every bid has full sub coverage, levelled numbers and a complete package on bid day. The GC sets the price.",
+      "planNote": "Full-Time only. Not included in Part-Time.",
+      "tasks": [
+        {
+          "id": "bid_calendar",
+          "name": "Bid calendar",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Track invites, walkthroughs and due dates.",
+          "cadence": "Updated as invitations arrive; reviewed with the GC weekly for go/no-go",
+          "approval": "Go/no-go is the GC's call. The VA prepares the summary.",
+          "deliverables": [
+            "Bid log with go/no-go summaries",
+            "Pre-bid meeting dates on the calendar"
+          ],
+          "training": [
+            "desk-bid · Bid Calendar & Go/No-Go Prep"
+          ]
+        },
+        {
+          "id": "invitations_to_bid",
+          "name": "Invitations to bid",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Send plans to subs and follow up for numbers.",
+          "cadence": "Invites out the day the bid is a go; coverage chased on the desk's cadence until bid day",
+          "approval": "The GC approves the sub list by trade. The VA sends, chases and tracks coverage.",
+          "deliverables": [
+            "Coverage tracker per bid, by trade"
+          ],
+          "training": [
+            "desk-bid · Sub Coverage & Bid Leveling",
+            "desk-bid · Plans, Specs & Addenda"
+          ]
+        },
+        {
+          "id": "bid_leveling",
+          "name": "Bid leveling",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Line up sub quotes side by side for easy comparison.",
+          "cadence": "As numbers come in; final leveling the day before bid day",
+          "approval": "The VA levels scope and flags gaps and plugs. The GC chooses the number.",
+          "deliverables": [
+            "Leveling sheet per trade"
+          ],
+          "training": [
+            "desk-bid · Sub Coverage & Bid Leveling (leveling, clarifying, plugs and gaps)"
+          ]
+        },
+        {
+          "id": "vendor_pricing",
+          "name": "Vendor pricing",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Get current material pricing and lead times.",
+          "cadence": "Per bid; standing price lists refreshed on the GC's schedule",
+          "approval": "The VA collects. The GC applies markup and chooses.",
+          "deliverables": [
+            "Material pricing and lead-time sheet"
+          ],
+          "training": [
+            "desk-quote · Pricing: Subs, Materials, Labor & Markup"
+          ]
+        },
+        {
+          "id": "proposals",
+          "name": "Proposals",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Format and send your proposals and qualifications.",
+          "cadence": "Per bid or quote; follow-up sequence after sending",
+          "approval": "The GC approves every number and signs. The VA formats, sends and follows up.",
+          "deliverables": [
+            "Proposal in the GC's template",
+            "Follow-up log"
+          ],
+          "training": [
+            "desk-quote · Sending, Follow-Up & Reporting",
+            "desk-bid · The Bid Package, Prequal & Win/Loss"
+          ]
+        },
+        {
+          "id": "prequalification",
+          "name": "Prequalification",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Fill out owner and GC prequal forms.",
+          "cadence": "As requested; the prequal pack refreshed when insurance or licenses renew",
+          "approval": "The VA fills from the prequal pack. Financial statements and signatures stay with the GC.",
+          "deliverables": [
+            "Prequal pack kept current: insurance, licenses, references, project list"
+          ],
+          "training": [
+            "desk-bid · The Bid Package, Prequal & Win/Loss (prequalification packages)"
+          ]
+        }
+      ],
+      "vaOnboarding": {
+        "requiredModules": [
+          {
+            "module": "desk-bid",
+            "title": "Bid Desk (Commercial)",
+            "for": "full_time",
+            "why": "Bid calendar, plans and addenda, takeoff fundamentals, coverage, leveling, the bid package and prequal"
+          },
+          {
+            "module": "desk-quote",
+            "title": "Quote Desk (Residential)",
+            "for": "full_time",
+            "why": "For residential clients: the 48-hour clock, scope writing, pricing inputs, sending and follow-up"
+          },
+          {
+            "module": "quotes",
+            "title": "Generating Quotes",
+            "for": "full_time",
+            "why": "Anatomy of a construction quote and follow-up tracking"
+          },
+          {
+            "module": "quote-builder-app",
+            "title": "The Quote Builder App",
+            "for": "full_time",
+            "why": "Only when the client quotes through Tradezip"
+          }
+        ],
+        "brushUp": [
+          "Where invitations come from, the bid log and the go/no-go summary",
+          "Organizing plans, specs and addenda; bid-phase RFIs; alternates and unit prices",
+          "Takeoff fundamentals: set the scale on every sheet, organize by trade and area, self-check",
+          "Invitations to bid, the coverage tracker and chase cadence",
+          "Leveling apples to apples, clarifying a sub's number, plugs and gaps",
+          "The bid package checklist and bid-day roles; the win/loss log",
+          "Markup versus margin, and the pre-send accuracy check",
+          "Residential: the 48-hour clock from site visit to proposal, and writing scope a homeowner can read",
+          "Coverage gaps and post-bid follow-up: who is bidding, and what was won, lost or pending"
+        ],
+        "readiness": [
+          "Pass the Bid Desk quiz and assignment",
+          "Residential clients: pass the Quote Desk quiz and assignment",
+          "Practical: build a coverage tracker and leveling sheet for one trade from three sample sub quotes",
+          "Practical: assemble a bid package checklist from a sample invitation and spec book",
+          "Clients on Tradezip: complete the Quote Builder deep dive and submit a test quote for approval"
+        ],
+        "firstWeekSetup": [
+          "Set up the bid calendar: invites, walkthroughs, due dates",
+          "Get the sub bid list by trade and how plans are shared",
+          "Build the bid leveling template",
+          "Get the proposal and qualifications template",
+          "Load the prequalification pack: insurance, licenses, references, project list"
+        ]
+      },
+      "clientOnboarding": {
+        "techStack": [
+          {
+            "tool": "Bid platforms and plan rooms (BuildingConnected, PlanHub, iSqFt, Dodge, agency portals)",
+            "need": "if_used",
+            "purpose": "Where invitations arrive and plans are shared"
+          },
+          {
+            "tool": "Plan sharing (shared drive or plan room link)",
+            "need": "required",
+            "purpose": "Sending plans and addenda to subs"
+          },
+          {
+            "tool": "Takeoff tool (Bluebeam, PlanSwift, STACK)",
+            "need": "if_used",
+            "purpose": "Quantities, when the GC wants takeoff support"
+          },
+          {
+            "tool": "Spreadsheet",
+            "need": "required",
+            "purpose": "Bid log, coverage tracker, leveling sheet, pricing sheet"
+          },
+          {
+            "tool": "Proposal template (Word, Docs or Tradezip Quote Builder)",
+            "need": "required",
+            "purpose": "Proposals in the GC's format"
+          },
+          {
+            "tool": "E-signature",
+            "need": "if_used",
+            "purpose": "Proposal acceptance"
+          },
+          {
+            "tool": "Company email",
+            "need": "required",
+            "purpose": "Invitations, chases and proposals under the company name"
+          }
+        ],
+        "access": [
+          {
+            "system": "Bid platforms",
+            "level": "User seat on the GC's company account",
+            "grantedBy": "GC",
+            "when": "When bids are handed off"
+          },
+          {
+            "system": "Plan files",
+            "level": "Edit on the bids folder",
+            "grantedBy": "GC",
+            "when": "When bids are handed off"
+          },
+          {
+            "system": "Proposal template and pricing inputs",
+            "level": "Template, unit rates and markup rules as the GC chooses to share",
+            "grantedBy": "GC",
+            "when": "When bids are handed off"
+          },
+          {
+            "system": "Prequalification pack",
+            "level": "Insurance, licenses, references; financial statements stay with the GC",
+            "grantedBy": "GC",
+            "when": "When bids are handed off"
+          },
+          {
+            "system": "Tradezip Quote Builder",
+            "level": "Assistant login under the client's tenant",
+            "grantedBy": "Offload admin",
+            "when": "If the client quotes through Tradezip"
+          }
+        ],
+        "inputs": [
+          "Sub bid list by trade, and how plans are shared with them",
+          "Where invitations to bid come from today",
+          "Proposal and qualifications template",
+          "Prequalification pack: insurance, licenses, references, project list",
+          "Unit rates, labor rates and markup rules the GC is willing to share, or who to ask"
+        ],
+        "decisions": [
+          "Go/no-go is the GC's; the VA prepares the summary",
+          "The VA never sets a price or sends a number the GC hasn't approved",
+          "Who signs bid forms and proposals, and bid-day roles",
+          "Which trades the VA may clarify directly with subs, and what goes to the estimator"
+        ]
+      },
+      "primer": {
+        "why": "To win work the GC prices the project from sub quotes plus its own costs and overhead. The VA handles the logistics around the number so the estimator can spend bid week pricing.",
+        "terms": [
+          "Invitation to bid (ITB): plans and scope sent to a list of subs for each trade, with confirmation that they received them.",
+          "Takeoff: quantities measured from the plans, usually by estimators or subs.",
+          "Coverage: how many quotes each trade has. One or none close to bid day is a scramble.",
+          "Leveling: comparing quotes apples to apples. A low number may leave out what another included.",
+          "Prequalification: owner and GC forms proving insurance, licenses, references and financials. Financials stay with the GC."
+        ],
+        "goesWrong": [
+          "Dozens of subs invited, many never reply, and the GC cannot tell who is bidding",
+          "Quotes arrive in different formats close to the deadline",
+          "Proposal formatting eats estimator time meant for pricing",
+          "Post-bid silence: nobody follows up, and won, lost and pending are not tracked"
+        ]
+      }
+    },
+    {
+      "id": "office",
+      "code": "OP",
+      "name": "Office & phones",
+      "short": "Office",
+      "color": "#9b6fd4",
+      "tagline": "Your assistant answers calls, follows up on leads and manages your inbox.",
+      "example": "A new lead calls while you're on site. Your assistant calls back the same day and books your walkthrough.",
+      "outcome": "Every call answered or returned the same day, every lead booked, the inbox and calendar handled, and the GC gets one end-of-day summary.",
+      "planNote": "Part-Time covers phones, email and calendar. Full-Time adds document filing and recurring admin.",
+      "tasks": [
+        {
+          "id": "phone_coverage",
+          "name": "Phone coverage",
+          "plan": "part_time",
+          "trial": "days_4_7",
+          "what": "Answer calls, take messages, route what's urgent.",
+          "cadence": "Live during coverage hours; missed calls and voicemails returned the same day",
+          "approval": "The GC defines what counts as urgent and how it is routed. The VA answers in the agreed greeting.",
+          "deliverables": [
+            "Call log and messages in the end-of-day summary"
+          ],
+          "training": [
+            "day-2 · Phone & Verbal Communication",
+            "desk-day-to-day · Leads, Reviews & the Owner's Inbox"
+          ]
+        },
+        {
+          "id": "lead_follow_up",
+          "name": "Lead follow-up",
+          "plan": "part_time",
+          "trial": "days_4_7",
+          "what": "Call back new inquiries and book estimates.",
+          "cadence": "Same-day callback; follow-up sequence until booked or closed",
+          "approval": "The VA qualifies with the GC's intake questions and books within the GC's availability. The GC quotes.",
+          "deliverables": [
+            "Lead list with status",
+            "Booked estimates on the calendar"
+          ],
+          "training": [
+            "lead-gen · Handling Inbound Leads",
+            "desk-day-to-day · Inbound lead response"
+          ]
+        },
+        {
+          "id": "inbox",
+          "name": "Inbox management",
+          "plan": "part_time",
+          "trial": "days_4_7",
+          "what": "Sort, reply and flag what needs you.",
+          "cadence": "Worked through the day; inbox zero or flagged by end of day",
+          "approval": "The GC sets what the VA answers alone and what is flagged. Labels or folders as agreed.",
+          "deliverables": [
+            "Flagged items in the end-of-day summary"
+          ],
+          "training": [
+            "day-4 · Google Workspace (Gmail labels and filters)",
+            "day-2 · Written Communication Standards"
+          ]
+        },
+        {
+          "id": "calendar",
+          "name": "Calendar",
+          "plan": "part_time",
+          "trial": "days_4_7",
+          "what": "Keep your site visits and meetings organized.",
+          "cadence": "Daily; tomorrow confirmed in the end-of-day summary",
+          "approval": "The VA books within the GC's rules for site visits and meetings.",
+          "deliverables": [
+            "Tomorrow's schedule in the end-of-day summary"
+          ],
+          "training": [
+            "day-4 · Sheets & Calendar",
+            "desk-day-to-day · Email and calendar management"
+          ]
+        },
+        {
+          "id": "document_filing",
+          "name": "Document filing",
+          "plan": "full_time",
+          "trial": "week_2",
+          "what": "Contracts, plans and photos where you can find them.",
+          "cadence": "Daily as documents arrive",
+          "approval": "Filed in the structure agreed at kickoff; nothing is deleted.",
+          "deliverables": [
+            "Folder structure per job, kept current"
+          ],
+          "training": [
+            "day-4 · Google Drive: file naming",
+            "day-4 · File Management & Security"
+          ]
+        },
+        {
+          "id": "other_admin",
+          "name": "Other admin",
+          "plan": "full_time",
+          "trial": "after_trial",
+          "what": "Recurring tasks you'd rather not do yourself: onboarding paperwork, certifications, timesheets, reviews.",
+          "cadence": "On the GC's recurring list",
+          "approval": "Each recurring task is written down with its owner and cadence at day 30.",
+          "deliverables": [
+            "Recurring admin list with cadence"
+          ],
+          "training": [
+            "desk-day-to-day · HR Admin",
+            "desk-day-to-day · Proposal follow-up and review requests"
+          ]
+        }
+      ],
+      "vaOnboarding": {
+        "requiredModules": [
+          {
+            "module": "day-2",
+            "title": "English Communication",
+            "for": "both",
+            "why": "Written standards, email structure, phone and verbal communication, construction scripts"
+          },
+          {
+            "module": "day-4",
+            "title": "Tools & Systems",
+            "for": "both",
+            "why": "Gmail labels and filters, Drive naming, Sheets and Calendar, security"
+          },
+          {
+            "module": "day-5",
+            "title": "Client Management",
+            "for": "both",
+            "why": "First-week questions, the end-of-day report, difficult situations, limits"
+          },
+          {
+            "module": "desk-day-to-day",
+            "title": "Day-to-Day Coverage",
+            "for": "both",
+            "why": "Inbound lead response, the owner's inbox, document filing, HR admin"
+          },
+          {
+            "module": "lead-gen",
+            "title": "Lead Generation",
+            "for": "both",
+            "why": "What a qualified lead looks like and handling inbound leads"
+          }
+        ],
+        "brushUp": [
+          "Answering and opening a call, clarity on calls, and what to say when you don't know",
+          "The subject line formula, the status update format and the filler phrases to eliminate",
+          "Inbound lead response: the GC's intake questions, estimate booking rules and availability",
+          "Gmail labels and filters, and the inbox rules agreed with the GC",
+          "Calendar rules for site visits and meetings",
+          "Drive file naming and the filing structure for contracts, plans and photos",
+          "The end-of-day report: do it every day",
+          "Password and credential security and the data security hard limits",
+          "Where a GC's systems overlap, and where the same thing gets typed twice"
+        ],
+        "readiness": [
+          "Pass the Day 2, Day 4 and Day 5 quizzes and assignments; Day 5 certification",
+          "Pass the Day-to-Day Coverage quiz and assignment",
+          "Practical: take a mock inbound lead call, qualify it and book the estimate",
+          "Practical: triage a sample inbox of 15 messages into answer, flag and file, and write the end-of-day summary"
+        ],
+        "firstWeekSetup": [
+          "Write the call greeting; define what counts as urgent and how to route it",
+          "Lead intake: the questions to ask, estimate booking rules, GC availability",
+          "Inbox rules: what to answer, what to flag, the folder or label structure",
+          "Calendar rules for site visits and meetings",
+          "Set the filing structure for contracts, plans and photos",
+          "List the GC's recurring admin tasks",
+          "Send the first end-of-day summary on day 4"
+        ]
+      },
+      "clientOnboarding": {
+        "techStack": [
+          {
+            "tool": "Phone line",
+            "need": "required",
+            "purpose": "Offload assigns the client a Quo number (CRM → Settings → Lines) that the VA answers and texts from; the GC forwards the main line to it or publishes it. Or a seat on the GC's own system (RingCentral, Google Voice)"
+          },
+          {
+            "tool": "Company email (Google Workspace or Microsoft 365)",
+            "need": "required",
+            "purpose": "A mailbox on the GC's domain, or delegate access to the GC's"
+          },
+          {
+            "tool": "Calendar (Google or Outlook)",
+            "need": "required",
+            "purpose": "Site visits, estimates and meetings"
+          },
+          {
+            "tool": "Shared drive",
+            "need": "required",
+            "purpose": "Contracts, plans and photos"
+          },
+          {
+            "tool": "The GC's CRM or lead tool (Jobber, Buildertrend leads, HubSpot)",
+            "need": "if_used",
+            "purpose": "Lead status, if the GC has one. Texts and calls on the client's Quo line are already in the Offload CRM"
+          },
+          {
+            "tool": "Password manager",
+            "need": "required",
+            "purpose": "Sharing any login without sending passwords in email or text"
+          }
+        ],
+        "access": [
+          {
+            "system": "Company email",
+            "level": "Own mailbox on the GC's domain, or delegate access",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3"
+          },
+          {
+            "system": "Client's Quo number",
+            "level": "Member of the number; the GC sets forwarding or coverage hours",
+            "grantedBy": "Offload admin and GC",
+            "when": "Before day 1"
+          },
+          {
+            "system": "Calendar",
+            "level": "Edit",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3"
+          },
+          {
+            "system": "Shared drive",
+            "level": "Edit on the jobs folder",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3"
+          },
+          {
+            "system": "GC's CRM or lead tool",
+            "level": "User seat",
+            "grantedBy": "GC",
+            "when": "Trial days 1–3, if used"
+          },
+          {
+            "system": "Shared logins",
+            "level": "Shared through the password manager only",
+            "grantedBy": "GC",
+            "when": "As each tool is handed off"
+          }
+        ],
+        "inputs": [
+          "The call greeting, what counts as urgent and how to route it",
+          "Lead intake questions, estimate booking rules and the GC's availability",
+          "Inbox rules: what to answer, what to flag, the folder or label structure",
+          "Calendar rules for site visits and meetings",
+          "The filing structure for contracts, plans and photos, or permission to set one",
+          "The GC's list of recurring admin tasks (Full-Time)",
+          "Contact lists: subs, vendors, owners, inspectors"
+        ],
+        "decisions": [
+          "What the VA may answer alone, and what is flagged to the GC",
+          "Who may be given the GC's cell number, and how urgent items reach the GC",
+          "Coverage hours, time-zone overlap and what happens to calls outside them",
+          "The end-of-day summary format and channel, and the weekly check-in time"
+        ]
+      },
+      "primer": {
+        "why": "The owner is usually head of sales and head firefighter at the same time, so the inbox, calendar and follow-ups slip first. GCs also run several disconnected tools, and the same information gets typed twice.",
+        "terms": [
+          "Project management software (Procore, Buildertrend): RFIs, submittals, schedules, daily logs, drawings.",
+          "Accounting (QuickBooks, Sage): job costing, AP and AR, payroll, invoices.",
+          "Spreadsheets: pay apps, bid leveling, trackers. Flexible and fragile.",
+          "Email and drive: where everything else lives, and where things get lost."
+        ],
+        "goesWrong": [
+          "A sub invoice entered in the project system and again in accounting",
+          "Contract values and change orders updated in one place but not the other, so reports disagree",
+          "Month-end close slows while someone reconciles what each system shows",
+          "A new lead calls while the owner is on site and is never called back"
+        ]
+      }
+    }
+  ],
+  "vaFoundation": {
+    "intro": "Every assistant goes through the same foundation before a client ever meets them. The service desks are added on top, by what the client's plan needs.",
+    "vetting": [
+      "Construction background: knows what a COI, a pay app and a change order are before day one",
+      "English fluency: comfortable on the phone with subs, suppliers and owners",
+      "Software: QuickBooks, Google Workspace, Microsoft 365, Excel; a plus for Buildertrend, Procore, CoConstruct, Jobber or ServiceTitan",
+      "Reliability: dedicated to one company, working its hours, with the home setup Day 4 requires"
+    ],
+    "trainingPath": [
+      {
+        "stage": "Foundation week in Crew Training",
+        "gate": "Quiz and assignment each day; certification on Day 5",
+        "items": [
+          "Day 1 · Foundation: what Offload does, the VA's role, the construction client profile, professional standards",
+          "Day 2 · English Communication: written standards, email structure and drills, phone and verbal, construction language and scripts",
+          "Day 3 · Construction Deep Dive: the trades, project lifecycle, permits and compliance, invoicing and draws",
+          "Day 4 · Tools & Systems: Google Workspace, QuickBooks Online, field service tools, file management and security",
+          "Day 5 · Client Management: the first week with a client, difficult situations, limits, long-term excellence"
+        ]
+      },
+      {
+        "stage": "Day-to-Day Coverage desk",
+        "gate": "Quiz and assignment",
+        "items": [
+          "Included with every placement: sub confirmations and the lookahead, permits and inspections, leads and the owner's inbox, QuickBooks entry, HR admin"
+        ]
+      },
+      {
+        "stage": "Service desks for the client's plan",
+        "gate": "The desks behind the first handoffs before the intro call; every desk in the plan before the day 30 review",
+        "items": [
+          "Sub Compliance · for Subcontractors & vendors",
+          "Pay App & Lien Waiver Desk · for Billing & money (Full-Time) and lien waivers",
+          "Project Coordinator · for Project coordination (Full-Time) and change orders",
+          "Bid Desk (Commercial) and Quote Desk (Residential) · for Bids & estimating support",
+          "Day-to-Day Coverage · for Office & phones and every placement"
+        ]
+      },
+      {
+        "stage": "Deep dives when the client needs them",
+        "gate": "Quiz and assignment",
+        "items": [
+          "The Quote Builder App · clients quoting through Tradezip",
+          "Lead Generation · clients handing off phones and leads",
+          "Generating Quotes · residential proposals"
+        ]
+      }
+    ],
+    "internalSetup": [
+      "Launcher login (the Quote Builder login) with the Assistant role; the launcher opens Crew Training, the CRM, Invoice Chaser and Workflows",
+      "Offload Gmail mailbox, connected in the CRM under Email; told in writing that work email is copied to the team mailbox",
+      "CRM: an assignment on the client (account → Assignments) so the VA sees that client only, never prices or contracts",
+      "Quo: added as a member of the client's number, then Refresh from Quo in CRM → Settings → Lines",
+      "Crew Training progress visible on the admin dashboard before the intro call",
+      "Confidentiality agreement signed; a copy kept on the client file",
+      "Client credentials only in the password manager, never in email, text or a spreadsheet"
+    ],
+    "placementBrief": [
+      "Client type and the plan (Part-Time or Full-Time)",
+      "Active jobs, key subs, owners and vendors",
+      "The first handoffs for days 4–7 and week 2, and what must go through the GC before it is sent",
+      "The tools the client uses and which the VA will be in",
+      "Working hours, time-zone overlap and phone coverage hours",
+      "The end-of-day summary format and channel, and the weekly check-in time",
+      "What a successful trial looks like at day 14"
+    ],
+    "workingRules": [
+      "Week 1 goal is to understand first: ask the Day 1 questions, learn how the GC runs things, then take over",
+      "An end-of-day summary every day: done, waiting on the GC, tomorrow",
+      "Hard limits: no pricing decisions, no signing, no bank access, no deleting records, no promises to owners or subs the GC hasn't made",
+      "Never decide whether coverage satisfies a contract, sign off percent complete, review anything legal, or negotiate with owners or subs. Those stay with the GC's people",
+      "When you don't know how, say so and ask; when instructions conflict, ask the GC rather than guess",
+      "Log every correction the GC makes so it becomes a rule",
+      "Escalate the day something slips: a missed deadline, an unreachable client, a mistake you made"
+    ],
+    "brushUpCadence": [
+      "Before each new placement: re-take the desk quizzes behind that client's first handoffs",
+      "Day 30 of a placement: finish every desk in the client's plan before the remaining areas are handed off",
+      "When a client adds a service area: the desk for it before the handoff",
+      "Day 90: write down the client's routines so a replacement can step in"
+    ],
+    "boundaries": {
+      "intro": "Being clear on this is part of the job. The VA owns the follow-through; the GC's people own the decisions.",
+      "handOff": [
+        "Chasing and reminders",
+        "Trackers and logs",
+        "Drafting from the GC's templates",
+        "Filing and data entry",
+        "Scheduling subs, site visits and inspections",
+        "Compiling packages: waivers, pay apps, submittals, bids",
+        "Follow-up emails the GC approves"
+      ],
+      "keepWithGc": [
+        "Pricing and scope decisions",
+        "Percent-complete sign-off",
+        "Deciding whether coverage satisfies the contract",
+        "Legal review, and stating legal requirements to anyone",
+        "Signing, and releasing payments",
+        "Negotiating with owners and subs",
+        "Anything on site"
+      ]
+    }
+  },
+  "clientPath": {
+    "intro": "One path for every client, from the free call to day 90. The two gates are where the client decides whether to go on: nothing is billed until they say yes after the intro call, and they decide again at day 14.",
+    "phases": [
+      {
+        "id": "discovery",
+        "name": "Discovery call",
+        "when": "Day 1",
+        "goal": "Find where the GC's office time goes and agree the first 3–5 handoffs. Most GCs start with scheduling, COIs and invoicing.",
+        "offload": [
+          "Confirm the booking from the Book a Call page and send the invite",
+          "Record company basics: legal name, client type, active jobs, current office staff",
+          "Walk through the GC's week and list the top time sinks in hours per week",
+          "Ask the discovery questions for the areas on the table (admins: Sales → Discovery questions)",
+          "Record every tool they use: QuickBooks, Google Workspace or Microsoft 365, Excel, any construction platform",
+          "Choose the plan: Part-Time for 1–3 jobs, Full-Time for several jobs at once",
+          "Agree the first handoffs and what must go through the GC before it is sent",
+          "Note working hours, time-zone overlap and phone coverage hours",
+          "Send a same-day recap: plan, first handoffs, next steps"
+        ],
+        "client": [
+          "Bring a rough list of the tasks eating the week",
+          "Bring the list of tools already in use"
+        ],
+        "va": []
+      },
+      {
+        "id": "match",
+        "name": "Match and intro call",
+        "when": "Within 1–2 weeks",
+        "goal": "The GC meets a hand-picked assistant and makes the final decision. No charge until they say yes.",
+        "offload": [
+          "Screen candidates for construction experience, English fluency, and the client's tools and first handoffs",
+          "Pick one assistant and send the GC their background notes and strengths",
+          "Book the intro call and brief the assistant on the client's type, jobs and first handoffs",
+          "If the fit seems off, talk it through and offer another candidate",
+          "Get a clear yes from the GC before anything starts"
+        ],
+        "client": [
+          "Ask about the assistant's experience and how they would handle the work",
+          "Decide: yes, or ask for another candidate"
+        ],
+        "va": [
+          "Complete the desks behind the first handoffs before the call",
+          "Come with questions about the client's jobs, subs and tools"
+        ]
+      },
+      {
+        "id": "agreement",
+        "name": "Agreement and billing",
+        "when": "After the yes",
+        "goal": "Terms in writing, payment set up, trial dates booked.",
+        "offload": [
+          "Send the service agreement: plan, monthly rate, payment due date, 14 days' written notice by either side",
+          "State the trial terms in writing: cancel during the trial and pay only for time worked, prorated, refunded within 10 business days",
+          "Note that payment more than 14 days late can pause service",
+          "Set the trial start date and book the end-of-trial review before day 14",
+          "Send the welcome email: start date, the assistant's name and contact, what access to have ready",
+          "In the CRM: move the deal to won, create the contract with the plan's service line, add the assignment"
+        ],
+        "client": [
+          "Sign the service agreement",
+          "Set up payment by card or ACH; the first month is billed in advance"
+        ],
+        "va": [
+          "Sign the confidentiality agreement"
+        ]
+      },
+      {
+        "id": "kickoff",
+        "name": "Trial days 1–3: kickoff and access",
+        "when": "Trial days 1–3",
+        "goal": "Only the access the first handoffs need, widened as trust builds. The GC owns every account and can revoke access at any time.",
+        "offload": [
+          "Run the kickoff walkthrough: introductions, working hours, how to reach the GC for urgent items",
+          "Agree approval rules: pay apps always go through the GC; owner updates, change orders and reschedules as the GC chooses",
+          "Agree the end-of-day summary format and channel, and the weekly check-in time",
+          "Agree what a successful trial looks like at day 14",
+          "Log every access grant in the register so it can be revoked at the end"
+        ],
+        "client": [
+          "Walk through how you run things: active jobs, key subs, owners, vendors",
+          "Create a company email account, or delegate access, on your own domain",
+          "Set up the phone line or forward calls to the Quo number",
+          "Add a QuickBooks user limited to the tasks in the plan",
+          "Share job files: contracts, plans, photos, schedules",
+          "Share your calendar",
+          "Add a login for any construction platform you use",
+          "Send contact lists for subs, vendors, owners and inspectors"
+        ],
+        "va": [
+          "Ask the Day 1 questions; understand before changing anything",
+          "Build the trackers the first handoffs need (see each service area's first-week setup)",
+          "Agree how you introduce yourself to subs and owners; set up the email signature"
+        ]
+      },
+      {
+        "id": "handoffs",
+        "name": "Trial days 4–7: first handoffs",
+        "when": "Trial days 4–7",
+        "goal": "Routine work first: sub scheduling, COI tracking, inbox and phones.",
+        "offload": [
+          "Check in with the GC at the end of week 1: what works, what to fix"
+        ],
+        "client": [
+          "Answer the VA's questions the same day during week 1",
+          "Say what to change rather than redoing it yourself"
+        ],
+        "va": [
+          "Take over sub scheduling, COI tracking, inbox and phones",
+          "Send the end-of-day summary every day"
+        ]
+      },
+      {
+        "id": "week2",
+        "name": "Trial week 2: bigger tasks",
+        "when": "Trial days 8–13",
+        "goal": "Invoicing, pay app drafts, permits and owner updates, with the GC reviewing each before it goes out.",
+        "offload": [
+          "Log corrections the GC makes so they become the assistant's rules"
+        ],
+        "client": [
+          "Review each invoice, pay app draft, permit and owner update before it goes out",
+          "Widen access for week 2: QuickBooks for invoicing, permit portals, owner contacts"
+        ],
+        "va": [
+          "Take on invoicing, pay app drafts, permits and owner updates",
+          "Keep the end-of-day summary going"
+        ]
+      },
+      {
+        "id": "day14",
+        "name": "End-of-trial review",
+        "when": "Before day 14",
+        "goal": "Keep, swap or stop. The second gate.",
+        "offload": [
+          "Hold the review call",
+          "Keep: confirm the plan, widen access as needed, move to monthly billing",
+          "Swap: introduce another candidate, at Offload Crew's discretion",
+          "Stop: bill only the prorated time worked, refund the rest within 10 business days, revoke every access in the register"
+        ],
+        "client": [
+          "Decide: keep, swap or stop"
+        ],
+        "va": []
+      },
+      {
+        "id": "steady",
+        "name": "Days 15–90",
+        "when": "Day 30, 60, 90",
+        "goal": "Step back from daily oversight to a monthly review and hand off the rest of the plan.",
+        "offload": [
+          "Day 30: compare hours saved with the discovery-call time sinks; hand off the plan's remaining service areas; widen access and update the register; confirm the first monthly payment",
+          "Day 60: spot-check the work: COIs current, lien waivers in for each draw, AR aging, pay apps on time; raise Full-Time if the GC has taken on more jobs",
+          "Day 90: formal review with the GC; ask for a testimonial or referral"
+        ],
+        "client": [
+          "Monthly review with Offload",
+          "Widen access as the remaining areas are handed off"
+        ],
+        "va": [
+          "Finish every desk in the plan before day 30",
+          "Day 90: write down the client's routines so a replacement can step in"
+        ]
+      },
+      {
+        "id": "offboarding",
+        "name": "Any time the client leaves",
+        "when": "14 days' notice",
+        "goal": "Clean exit with every access revoked.",
+        "offload": [
+          "Confirm 14 days' written notice and bill through the end of it",
+          "Revoke every access in the register with the GC",
+          "In the CRM: end the assignment, end the contract, remove the VA from the Quo number"
+        ],
+        "client": [
+          "Revoke the VA's access on each system in the register"
+        ],
+        "va": [
+          "Hand over every tracker and log, current to the last day"
+        ]
+      }
+    ]
+  },
+  "accessCatalog": [
+    {
+      "id": "email",
+      "system": "Company email",
+      "areas": [
+        "subs",
+        "billing",
+        "projects",
+        "bids",
+        "office"
+      ],
+      "level": "Own mailbox on the GC's domain, or delegate access",
+      "grantedBy": "GC",
+      "when": "Trial days 1–3",
+      "revoke": "Suspend the mailbox or remove delegation"
+    },
+    {
+      "id": "phone",
+      "system": "Phone line",
+      "areas": [
+        "subs",
+        "office"
+      ],
+      "level": "Member of the client's Quo number; the GC forwards their line or publishes the number",
+      "grantedBy": "Offload admin (Quo) and GC (forwarding)",
+      "when": "Before day 1",
+      "revoke": "Remove from the Quo number; GC removes forwarding"
+    },
+    {
+      "id": "quickbooks",
+      "system": "QuickBooks",
+      "areas": [
+        "billing"
+      ],
+      "level": "User limited to the plan's tasks: AR and AP; no payroll or bank feeds unless the GC chooses",
+      "grantedBy": "GC",
+      "when": "Trial week 2, widened at day 30",
+      "revoke": "Delete the user"
+    },
+    {
+      "id": "drive",
+      "system": "Job files / shared drive",
+      "areas": [
+        "subs",
+        "billing",
+        "projects",
+        "bids",
+        "office"
+      ],
+      "level": "Edit on the jobs folder",
+      "grantedBy": "GC",
+      "when": "Trial days 1–3",
+      "revoke": "Remove sharing"
+    },
+    {
+      "id": "calendar",
+      "system": "Calendar",
+      "areas": [
+        "projects",
+        "office"
+      ],
+      "level": "Edit",
+      "grantedBy": "GC",
+      "when": "Trial days 1–3",
+      "revoke": "Remove sharing"
+    },
+    {
+      "id": "platform",
+      "system": "Construction platform (Buildertrend, Procore, CoConstruct, Jobber, ServiceTitan)",
+      "areas": [
+        "subs",
+        "projects",
+        "bids",
+        "office"
+      ],
+      "level": "User seat with the modules the plan needs",
+      "grantedBy": "GC",
+      "when": "Trial days 1–3, if used",
+      "revoke": "Deactivate the seat"
+    },
+    {
+      "id": "permits",
+      "system": "Permit portals",
+      "areas": [
+        "projects"
+      ],
+      "level": "Authorized agent or delegate on the GC's license account; where the license holder must submit, the VA prepares and tracks",
+      "grantedBy": "GC",
+      "when": "Trial week 2",
+      "revoke": "Remove the delegate"
+    },
+    {
+      "id": "billing_portals",
+      "system": "Owner or lender billing portals",
+      "areas": [
+        "billing"
+      ],
+      "level": "Submitter login, or the GC submits what the VA prepares",
+      "grantedBy": "GC",
+      "when": "Before the first pay app",
+      "revoke": "Remove the login"
+    },
+    {
+      "id": "esign",
+      "system": "E-signature",
+      "areas": [
+        "billing",
+        "bids"
+      ],
+      "level": "Sender seat; the GC stays the signer",
+      "grantedBy": "GC",
+      "when": "When change orders or proposals are handed off",
+      "revoke": "Remove the seat"
+    },
+    {
+      "id": "bid_platforms",
+      "system": "Bid platforms and plan rooms",
+      "areas": [
+        "bids"
+      ],
+      "level": "User seat on the company account",
+      "grantedBy": "GC",
+      "when": "When bids are handed off",
+      "revoke": "Remove the seat"
+    },
+    {
+      "id": "suppliers",
+      "system": "Supplier accounts",
+      "areas": [
+        "subs"
+      ],
+      "level": "Authorized to order up to the GC's limit",
+      "grantedBy": "GC",
+      "when": "When material orders are handed off",
+      "revoke": "Remove the authorized buyer"
+    },
+    {
+      "id": "contacts",
+      "system": "Contact lists: subs, vendors, owners, inspectors",
+      "areas": [
+        "subs",
+        "projects",
+        "office"
+      ],
+      "level": "A copy, kept in the client's drive and the Offload CRM",
+      "grantedBy": "GC",
+      "when": "Trial days 1–3",
+      "revoke": "Deleted from Offload systems at offboarding on request"
+    },
+    {
+      "id": "bank",
+      "system": "Bank",
+      "areas": [
+        "billing"
+      ],
+      "level": "None by default; at most read-only statements for reconciliation if the GC chooses",
+      "grantedBy": "GC",
+      "when": "Never by default",
+      "revoke": "Remove read access"
+    },
+    {
+      "id": "password_manager",
+      "system": "Password manager",
+      "areas": [
+        "subs",
+        "billing",
+        "projects",
+        "bids",
+        "office"
+      ],
+      "level": "Shared vault for any login that can't be a named user",
+      "grantedBy": "GC",
+      "when": "Trial days 1–3",
+      "revoke": "Remove from the vault and rotate shared passwords"
+    }
+  ],
+  "audiences": {
+    "assistant": "Service areas (tasks, know the work, VA onboarding, client onboarding), VA foundation, client path, access catalog, plans and client types.",
+    "admin": "Everything assistants see, plus Sales: discovery questions, offer status against the website, the pivot, guardrails and open items. In the CRM this sits behind the admin role; on this page behind the role switch."
+  },
+  "sales": {
+    "audience": "admin",
+    "intro": "Sales plays for admins, folded in from the Construction Back Office Deep Dive and its review comments. Assistants do not see this section. The explainers from the same document live with the assistants under each area's Know the work tab.",
+    "positioning": [
+      "Their person owns the decisions. The VA owns the follow-through.",
+      "Sell the pain in concrete terms: a sub not paid, a job stalled, a payment held up, a claim the GC is exposed to. Thin margins mean they cannot absorb it.",
+      "Being clear about what the VA does not own is a selling point. It shows we understand the risk and are not overselling.",
+      "Every placement is a 2-week trial with no upfront cost. The client decides after the intro call and again at day 14."
+    ],
+    "offerStatus": {
+      "intro": "The Deep Dive tagged several tasks Core or Confirm. The website is the offer of record, so this table settles each one against it.",
+      "rows": [
+        {
+          "item": "COI tracking",
+          "doc": "Confirm",
+          "site": "On the site. Part-Time. Named as a first handoff for most GCs.",
+          "status": "settled",
+          "note": "Sell it. The first-pass checklist check is ours; whether coverage satisfies the contract stays with the GC."
+        },
+        {
+          "item": "W-9 and license tracking",
+          "doc": "Confirm",
+          "site": "Sub onboarding, Full-Time.",
+          "status": "settled",
+          "note": "Collect, verify, file. W-9s stay in the GC's own systems."
+        },
+        {
+          "item": "Vendor setup in the GC's accounting system",
+          "doc": "Confirm",
+          "site": "Not on the site.",
+          "status": "open",
+          "note": "Data entry inside the QuickBooks access the GC grants, for the bookkeeper to approve. Decide whether to offer it by name."
+        },
+        {
+          "item": "Lien waiver collection",
+          "doc": "Confirm",
+          "site": "On the site. Full-Time.",
+          "status": "settled",
+          "note": "Send the right form, track what is in, compile the package. The GC releases payment."
+        },
+        {
+          "item": "Pay app drafts",
+          "doc": "Confirm",
+          "site": "On the site. Full-Time. The home page leads with it.",
+          "status": "settled",
+          "note": "Draft from the SOV and the PM's percent complete. The GC approves every pay app."
+        },
+        {
+          "item": "Retainage tracking",
+          "doc": "Confirm",
+          "site": "On the site. Full-Time.",
+          "status": "settled",
+          "note": "Both ways: held by the owner, held from subs."
+        },
+        {
+          "item": "Re-keying between project software and accounting",
+          "doc": "Confirm",
+          "site": "Not named. Covered by QuickBooks and platform access in the access catalog.",
+          "status": "open",
+          "note": "Offer it as part of QuickBooks and job costing once the GC has agreed the access catalog rows."
+        },
+        {
+          "item": "Bid board monitoring and past-client follow-up",
+          "doc": "Confirm",
+          "site": "Not on the site.",
+          "status": "open",
+          "note": "Prospecting is not an offer today. Research, tracking and drafts only if an admin approves it for a client, and never a promise of lead volume."
+        },
+        {
+          "item": "Estimates",
+          "doc": "Core",
+          "site": "Bids & estimating support is Full-Time only.",
+          "status": "correct the doc",
+          "note": "Not in Part-Time. Support around the number, never the number itself."
+        },
+        {
+          "item": "Dedicated or shared assistant",
+          "doc": "Open",
+          "site": "Dedicated to your company, working your hours.",
+          "status": "settled",
+          "note": "Say dedicated."
+        },
+        {
+          "item": "System access and security",
+          "doc": "Open",
+          "site": "The GC owns every account and can revoke access at any time; every assistant signs a confidentiality agreement.",
+          "status": "settled",
+          "note": "Point to the access catalog: level, who grants, when, how to revoke."
+        }
+      ]
+    },
+    "pilot": {
+      "default": "The website offer: a 2-week trial with access and a walkthrough on days 1–3, sub scheduling, COI tracking, inbox and phones on days 4–7, and invoicing, pay app drafts, permits and owner updates in week 2 with the GC reviewing.",
+      "addOn": "When the GC already has someone: one task for two weeks, alongside their person, never instead of. Best first picks: unpaid invoice follow-up, COI and lien waiver tracking, submittals tracking, or quote chasing on a live bid. Each has a before and after the GC can see.",
+      "rule": "Both run on the same trial terms. The add-on just starts with one handoff and widens at the day 14 review."
+    },
+    "discoveryQuestions": [
+      {
+        "area": "subs",
+        "questions": [
+          "How do you track sub insurance expirations today?",
+          "Has a lapsed or incorrect COI ever held up a job or a payment?",
+          "Who checks the certificate against the contract requirements: PM, coordinator, or the owner?",
+          "How many lien waivers do you collect each month, and who chases the ones that are missing?",
+          "Has a missing waiver ever delayed your own payment from the owner?"
+        ]
+      },
+      {
+        "area": "billing",
+        "questions": [
+          "Who builds your pay apps, and how long does a month's billing take?",
+          "What do you use: AIA forms, Excel, or built-in software?",
+          "How do you track retainage on both sides, owed to you and owed to subs?",
+          "Has an approved change order ever fallen through the cracks and gone unbilled?",
+          "On average, how long does it take from submitting a pay app to getting paid?",
+          "Who follows up on late owner payments, and how consistently?",
+          "Has cash flow ever limited the jobs you could take on?"
+        ]
+      },
+      {
+        "area": "projects",
+        "questions": [
+          "How do you track RFIs, submittals and change orders today: software, spreadsheet, or email?",
+          "Who follows up when the architect is slow to respond?",
+          "Who writes your daily logs, and how current do they stay?",
+          "If you had to find a specific photo from three months ago, how long would it take?"
+        ]
+      },
+      {
+        "area": "bids",
+        "questions": [
+          "How do you invite subs to bid, and how do you know who is actually bidding?",
+          "How long does it take to level bids and put together a proposal?",
+          "Do you track win and loss by bid, and does anyone follow up after you submit?"
+        ]
+      },
+      {
+        "area": "office",
+        "questions": [
+          "What software do you run projects and accounting in?",
+          "Where does information get typed twice?",
+          "Where does your next job come from, and who keeps those relationships warm?",
+          "Do you track bid opportunities and past clients in one place?"
+        ]
+      }
+    ],
+    "pivot": {
+      "line": "Their person owns the decisions. The VA owns the follow-through.",
+      "intro": "“I already have someone who does that” rarely ends the conversation. It means the work has an owner, not that it gets done on time, every time, without pulling a busy person off higher-value work. Find the gap around the person they have and offer to fill it next to them.",
+      "moves": [
+        "Agree, don't defend. “Good, that tells me it matters to you.”",
+        "Get specific. “Who handles it, and what does a normal month look like?”",
+        "Find the edge. Listen for: late, backlog, “when someone gets to it”, one person doing too much, nobody covering when they're out, an expensive person doing low-value work.",
+        "Offer the smallest add-on. One task, two weeks, alongside their person. Never “instead of”."
+      ],
+      "edgeQuestions": [
+        "What part of that do you wish happened faster?",
+        "When that person is out for a week, what happens to it?",
+        "What does that person have to put off to get it done?",
+        "Is anything done late, or only when someone has time?",
+        "If your PM got five hours a week back, what would they do with it?"
+      ],
+      "example": [
+        "GC: “My office manager already does that.”",
+        "You: “Good, that tells me it matters. Who follows up when an owner is 60 days late?”",
+        "GC: “Honestly, nobody. Whenever she gets to it.”",
+        "You: “That's the gap. We wouldn't replace her. We'd take the chasing so she can keep the books clean. Could we try one task for two weeks?”"
+      ]
+    },
+    "byWhoHasIt": [
+      {
+        "says": "My office manager or bookkeeper does that.",
+        "hides": "One person covering AP, AR, payroll and compliance. Chasing and follow-up slip first because they are repetitive and awkward.",
+        "ask": "Who follows up when an owner is 60 days late on a payment?",
+        "add": "Unpaid invoice follow-up and the aging report; COI and W-9 chasing. The bookkeeper keeps the books and approvals.",
+        "tasks": [
+          "invoicing_ar",
+          "coi_tracking",
+          "sub_onboarding"
+        ]
+      },
+      {
+        "says": "My PM or coordinator handles RFIs, submittals and change orders.",
+        "hides": "The PM's time going to logs and chasing instead of running the job.",
+        "ask": "How current is your submittal log right now, and who chases the architect when a review is late?",
+        "add": "Submittal, RFI and change order logs, permits tracking. The PM keeps drafting, pricing and decisions.",
+        "tasks": [
+          "rfis_submittals",
+          "change_orders",
+          "permits"
+        ]
+      },
+      {
+        "says": "My estimator handles bids.",
+        "hides": "Bid week spent on logistics (chasing quotes, formatting) instead of pricing.",
+        "ask": "How much of bid week goes to chasing sub quotes and assembling the package?",
+        "add": "Quote chasing, proposal assembly, bid prep. The estimator keeps pricing and scope.",
+        "tasks": [
+          "invitations_to_bid",
+          "bid_leveling",
+          "proposals"
+        ]
+      },
+      {
+        "says": "I do it myself, or a family member helps.",
+        "hides": "The owner is head of sales and head firefighter, so inbox, calendar and follow-ups slip.",
+        "ask": "What's the one thing you keep putting off?",
+        "add": "Owner inbox and calendar, scheduling subs and site visits, proposal follow-up.",
+        "tasks": [
+          "inbox",
+          "calendar",
+          "sub_scheduling",
+          "lead_follow_up"
+        ]
+      },
+      {
+        "says": "We have software for that (Procore, Buildertrend, QuickBooks).",
+        "hides": "Software stores information. It doesn't chase people, fill itself in or reconcile. Someone still keys things in and nudges.",
+        "ask": "Who keeps it updated, and where do people still use email or spreadsheets?",
+        "add": "Keeping it current, chasing, and entering once across systems, inside the access the GC grants.",
+        "tasks": [
+          "quickbooks",
+          "rfis_submittals",
+          "coi_tracking"
+        ]
+      },
+      {
+        "says": "My outside bookkeeper or CPA handles that.",
+        "hides": "They work in monthly or quarterly batches, not day-to-day follow-up.",
+        "ask": "Who handles it between their visits?",
+        "add": "Day-to-day tracking and invoice follow-up, so the outside bookkeeper gets clean information.",
+        "tasks": [
+          "invoicing_ar",
+          "accounts_payable",
+          "quickbooks"
+        ]
+      },
+      {
+        "says": "We already have a VA or an offshore team.",
+        "hides": "Don't assume what's wrong. Gaps in tasks, hours or construction know-how.",
+        "ask": "What do they cover, what hours, and what's not getting covered?",
+        "add": "Lean on what is settled: a dedicated, construction-trained, English-fluent assistant on the client's hours, in accounts the client owns.",
+        "tasks": []
+      },
+      {
+        "says": "We're covered.",
+        "hides": "Sometimes it's true.",
+        "ask": "When your workload spikes, or that person leaves, what's the plan?",
+        "add": "Leave the door open and ask whether anyone they know is stretched thin. Don't force it.",
+        "tasks": []
+      }
+    ],
+    "guardrails": [
+      "Say “takes repeat work off their plate”, not “replaces your person”.",
+      "Quote the website's plans and terms. Do not promise a start date or an assistant count that isn't settled; use “I'll confirm and get back to you by [day]”.",
+      "Do not claim system access or security details beyond the access catalog and the confidentiality agreement.",
+      "Do not state legal requirements: waiver forms, pay-when-paid, licensing. Ask what forms they use and who owns the process.",
+      "Everything about their setup is a question until they confirm it.",
+      "Dollar figures, percentages and counts in the primers are typical ranges for illustration, never facts about a prospect."
+    ],
+    "openItems": [
+      "Vendor setup in the GC's accounting system: offer it by name, or keep it inside QuickBooks data entry? Flagged in the Deep Dive review as a question of whether we can do it at all.",
+      "W-9 and taxpayer-ID handling: the VA rule here is that they stay in the GC's systems. Write the client-facing answer, since prospects ask before they book.",
+      "Licenses and registrations: which states and municipalities require what for the trades we serve. Build the matrix before promising license tracking on public work.",
+      "Capacity: submittals on a large job, and daily logs plus photos across several jobs, can each be a full-time load. Set expectations with the VA and the GC on volume before handing either off.",
+      "Which client systems the team may work in securely is answered by the access catalog; confirm it with each client at kickoff and log it in the register.",
+      "Percent complete and the SOV are sometimes kept by the GC's PM. Where a PM exists, find the gap (the crunch, the backup, the waivers) rather than offering to take the pay app itself."
+    ]
+  },
+  "academyLinks": {
+    "note": "Training references are '<academy module id> · <section or item heading>'. Module ids are the academy's own: day-1…day-5, lead-gen, quotes, quote-builder-app, desk-pay-app, desk-quote, desk-bid, desk-pc, desk-compliance, desk-day-to-day.",
+    "deepLink": "#module/<id>/<slug> for deep dives and desks, #day/<n>/<slug> for foundation days; slug = heading lowercased, non-alphanumerics to '-'.",
+    "moduleToArea": {
+      "desk-compliance": "subs",
+      "desk-pay-app": "billing",
+      "desk-pc": "projects",
+      "desk-bid": "bids",
+      "desk-quote": "bids",
+      "quotes": "bids",
+      "quote-builder-app": "bids",
+      "desk-day-to-day": "office",
+      "lead-gen": "office",
+      "day-1": "overview",
+      "day-2": "office",
+      "day-3": "billing",
+      "day-4": "office",
+      "day-5": "va"
+    }
+  }
+}

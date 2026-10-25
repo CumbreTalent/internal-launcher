@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <script src="auth.js"></script>
 <script>
-  // Same guard as Workflows: no session → launcher sign-in, then back here.
+  // Same guard as Knowledge: no session → launcher sign-in, then back here.
   document.documentElement.style.visibility = 'hidden'
   if (window.top !== window.self) document.documentElement.classList.add('in-launcher')
   LauncherAuth.session().then(function (s) {
@@ -127,7 +127,7 @@
         <div class="roles" role="radiogroup" aria-labelledby="role-lbl">
           <div class="role-opt">
             <input type="radio" name="role" id="role-va" value="va" checked>
-            <label for="role-va">Assistant<span>Quote Builder, Crew Training, Invoice Chaser, Workflows</span></label>
+            <label for="role-va">Assistant<span>Quote Builder, Crew Training, Invoice Chaser, CRM, Knowledge</span></label>
           </div>
           <div class="role-opt">
             <input type="radio" name="role" id="role-admin" value="admin">
